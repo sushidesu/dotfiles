@@ -1,0 +1,15 @@
+[user]
+	email = hugemerge@gmail.com
+	name = sushidesu
+[core]
+	editor = vim -c \"set fenc=utf-8\"
+	ignorecase = false
+	quotepath = false
+[alias]
+	lo = log --oneline
+	can = commit --amend --no-edit
+	fp = fetch --prune
+	a = add -A
+	c = commit
+	pl = pull
+	ps = push
