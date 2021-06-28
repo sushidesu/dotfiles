@@ -16,7 +16,9 @@ for i in $DOTPATH/.??*; do
   if is_exclude $i; then
     continue
   else
-    echo $i
+    FILENAME=`basename $i`
+    echo "$i -> ~/$FILENAME"
+    ln -sf $i $HOME/$FILENAME
   fi
 done
 
