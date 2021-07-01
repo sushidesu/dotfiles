@@ -1,5 +1,8 @@
 # Created by newuser for 5.4.2
 
+# aliasを読み込む
+source "$HOME/.zsh/alias.zsh"
+
 # user
 unsetopt PROMPT_SP
 autoload -Uz compinit
@@ -12,7 +15,7 @@ SAVEHIST=10000
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt auto_cd
-function chpwd() { ls --color=auto -F } # auto ls
+function chpwd() { ls } # auto ls
 
 ### Added by Zplugin's installer
 source "$HOME/.zplugin/bin/zplugin.zsh"
@@ -64,7 +67,4 @@ zplugin light 'denysdovhan/spaceship-zsh-theme'
 
 # my scripts
 export PATH="$HOME/.sushidesu/tools:$PATH"
-
-# aliasを読み込む
-source "$HOME/.zsh/alias.zsh"
 
