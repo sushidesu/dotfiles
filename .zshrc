@@ -58,16 +58,6 @@ zplugin light 'zdharma/fast-syntax-highlighting'
 # zplugin ice wait '1' atload'_zsh_autosuggest_start' lucid
 zplugin light 'zsh-users/zsh-autosuggestions'
 
-# alias
-alias ls='ls --color=auto -F'
-alias la='ls -a'
-alias vim='nvim'
-alias stumx='tmux new-session \; source-file ~/.config/tmux/session.conf'
-alias ktumx='tmux kill-server'
-alias cdvim='cd ~/.config/nvim/'
-alias atest='g++ main.cpp && oj t'
-alias ainit='xclip -o | xargs oj d && touch main.cpp'
-
 # theme
 zplugin ice wait'!0' lucid
 zplugin light 'denysdovhan/spaceship-zsh-theme'
@@ -75,5 +65,6 @@ zplugin light 'denysdovhan/spaceship-zsh-theme'
 # my scripts
 export PATH="$HOME/.sushidesu/tools:$PATH"
 
+# aliasを読み込む
 source "$HOME/.zsh/alias.zsh"
 
