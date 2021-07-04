@@ -13,3 +13,4 @@
 	c = commit
 	pl = pull
 	ps = push
+	ba = branch -a
