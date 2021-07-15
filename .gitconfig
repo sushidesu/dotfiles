@@ -6,11 +6,21 @@
 	ignorecase = false
 	quotepath = false
 [alias]
-	lo = log --oneline
+	alias = config --get-regexp ^alias\\.
+	lo = log --oneline -12 --reverse
+	logn = log --name-status --oneline -5
+	ss = status
+	ca = commit --amend
 	can = commit --amend --no-edit
 	fp = fetch --prune
 	a = add -A
 	c = commit
+	ac = commit -a
 	pl = pull
 	ps = push
+	sw = switch
+	swc = switch -c
 	ba = branch -a
+	bd = branch -d
+	bdd = branch -D
+
