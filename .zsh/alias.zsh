@@ -1,6 +1,6 @@
 # 基本的なコマンド
-alias ls='exa'
-alias la='exa -a'
+alias ls='exa -1 --sort Extension'
+alias la='exa -1 --sort Extension -a'
 alias vim='nvim'
 
 # 競プロ用
