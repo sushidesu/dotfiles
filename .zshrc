@@ -65,6 +65,9 @@ zplugin light 'zsh-users/zsh-autosuggestions'
 zplugin ice wait'!0' lucid
 zplugin light 'denysdovhan/spaceship-zsh-theme'
 
+# zoxide init
+eval "$(zoxide init zsh)"
+
 # my scripts
 export PATH="$HOME/.sushidesu/tools:$PATH"
 
