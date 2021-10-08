@@ -1,0 +1,18 @@
+[[plugins]]
+repo = 'maxmellon/vim-jsx-pretty'
+on_ft = ['javascript', 'typescript']
+
+[[plugins]]
+repo = 'jelera/vim-javascript-syntax'
+on_ft = ['javascript']
+
+[[plugins]]
+repo = 'neoclide/coc.nvim'
+on_ft = ['javascript', 'typescript']
+build = './install.sh nightly'
+hook_source = 'source ~/.config/nvim/coc-options.vim'
+
+[[plugins]]
+repo = 'cespare/vim-toml'
+on_ft = ['toml']
+
