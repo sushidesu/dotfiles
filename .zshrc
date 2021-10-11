@@ -3,6 +3,11 @@
 # aliasを読み込む
 source "$HOME/.zsh/alias.zsh"
 
+# init tools
+for i in $HOME/.zsh/run_at_startup/*; do
+  source $i
+done;
+
 # user
 unsetopt PROMPT_SP
 autoload -Uz compinit
@@ -23,28 +28,6 @@ autoload -Uz _zplugin
 (( ${+_comps} )) && _comps[zplugin]=_zplugin
 ### End of Zplugin installer's chunk
 
-# anyenv
-export PATH="$HOME/.anyenv/bin:$PATH"
-eval "$(anyenv init -)"
-
-# pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-fi
-
-# yarn
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-
-# goenv
-export GOENV_ROOT="$HOME/.goenv"
-export PATH="$GOENV_ROOT/bin:$PATH"
-eval "$(goenv init -)"
-export PATH="$GOROOT/bin:$PATH"
-export PATH="$PATH:$GOPATH/bin"
-
 # snippet
 zplugin snippet 'OMZ::lib/completion.zsh'
 zplugin snippet 'OMZ::lib/compfix.zsh'
@@ -64,9 +47,6 @@ zplugin light 'zsh-users/zsh-autosuggestions'
 # theme
 zplugin ice wait'!0' lucid
 zplugin light 'denysdovhan/spaceship-zsh-theme'
-
-# zoxide init
-eval "$(zoxide init zsh)"
 
 # my scripts
 export PATH="$HOME/.sushidesu/tools:$PATH"
