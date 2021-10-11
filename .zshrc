@@ -1,26 +1,15 @@
 # Created by newuser for 5.4.2
 
-# alias
-source "$HOME/.zsh/alias.zsh"
-
 # init tools
 for i in $HOME/.zsh/run_at_startup/*; do
   source $i
 done;
 
-# user
-unsetopt PROMPT_SP
-autoload -Uz compinit
-compinit
-setopt share_history
-setopt append_history
-HISTFILE=$HOME/.zsh-history
-HISTSIZE=10000
-SAVEHIST=10000
-setopt hist_ignore_all_dups
-setopt hist_ignore_space
-setopt auto_cd
-function chpwd() { ls } # auto ls
+# alias
+source "$HOME/.zsh/alias.zsh"
+
+# user options
+source "$HOME/.zsh/options.zsh"
 
 ### Added by Zplugin's installer
 source "$HOME/.zplugin/bin/zplugin.zsh"
@@ -47,7 +36,4 @@ zplugin light 'zsh-users/zsh-autosuggestions'
 # theme
 zplugin ice wait'!0' lucid
 zplugin light 'denysdovhan/spaceship-zsh-theme'
-
-# my scripts
-export PATH="$HOME/.sushidesu/tools:$PATH"
 
