@@ -1,6 +1,10 @@
 [user]
 	email = hugemerge@gmail.com
 	name = sushidesu
+[init]
+	defaultBranch = main
+[pull]
+	ff = only
 [core]
 	editor = vim -c \"set fenc=utf-8\"
 	ignorecase = false
