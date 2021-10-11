@@ -1,6 +1,6 @@
 # Created by newuser for 5.4.2
 
-# aliasを読み込む
+# alias
 source "$HOME/.zsh/alias.zsh"
 
 # init tools
