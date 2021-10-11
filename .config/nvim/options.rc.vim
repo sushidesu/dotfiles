@@ -49,3 +49,4 @@ set statusline+=%y
 
 " filetype
 au BufNewFile,BufRead *.toml setf toml
+
