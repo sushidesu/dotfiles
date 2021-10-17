@@ -20,6 +20,6 @@ zplugin ice !wait"0" lucid
 zplugin light 'zsh-users/zsh-autosuggestions'
 
 # theme
-zplugin ice !wait"0" lucid
-zplugin light 'denysdovhan/spaceship-zsh-theme'
+zinit ice !wait"0" lucid compile'(pure|async).zsh' pick'async.zsh' src'pure.zsh'
+zinit light sindresorhus/pure
 
