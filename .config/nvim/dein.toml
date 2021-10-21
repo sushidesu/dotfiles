@@ -6,3 +6,7 @@ repo = 'ayu-theme/ayu-vim'
 
 [[plugins]]
 repo = 'connorholyday/vim-snazzy'
+
+[[plugins]]
+repo = 'easymotion/vim-easymotion'
+
