@@ -9,3 +9,6 @@ alias vim='nvim'
 alias atest='g++ main.cpp && oj t'
 alias ainit='xclip -o | xargs oj d && touch main.cpp'
 
+# vscode
+alias coder='code -r .'
+
