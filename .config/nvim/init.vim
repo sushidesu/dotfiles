@@ -32,3 +32,6 @@ endif
 
 source ~/.config/nvim/keymap.rc.vim
 
+" Your .vimrc
+highlight QuickScopePrimary gui=underline
+

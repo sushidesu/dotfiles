@@ -10,3 +10,9 @@ repo = 'connorholyday/vim-snazzy'
 [[plugins]]
 repo = 'easymotion/vim-easymotion'
 
+[[plugins]]
+repo = 'unblevable/quick-scope'
+
+[[plugins]]
+repo = 'rhysd/clever-f.vim'
+
