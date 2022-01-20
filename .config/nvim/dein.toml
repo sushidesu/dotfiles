@@ -8,9 +8,6 @@ repo = 'ayu-theme/ayu-vim'
 repo = 'connorholyday/vim-snazzy'
 
 [[plugins]]
-repo = 'easymotion/vim-easymotion'
-
-[[plugins]]
 repo = 'unblevable/quick-scope'
 
 [[plugins]]

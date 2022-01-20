@@ -6,6 +6,7 @@ endif
 " Required:
 set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
+
 " Required:
 call dein#begin('~/.cache/dein')
 
@@ -16,6 +17,16 @@ call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
 " plugins
 call dein#load_toml('~/.dotfiles/.config/nvim/dein.toml', {'lazy': 0})
 call dein#load_toml('~/.dotfiles/.config/nvim/dein_lazy.toml', {'lazy': 1})
+
+" plugins for vscode
+if exists('g:vscode')
+    " VSCode extension
+    call dein#add('asvetliakov/vim-easymotion')
+else
+    " ordinary neovim
+    "call dein#add('easymotion/vim-easymotion')
+    "nmap s <Plug>(easymotion-s2)
+endif
 
 " Required:
 call dein#end()
@@ -34,4 +45,5 @@ source ~/.config/nvim/keymap.rc.vim
 
 " Your .vimrc
 highlight QuickScopePrimary gui=underline
+hi EasyMotionShade ctermfg=black guifg=#3b3d4a
 
