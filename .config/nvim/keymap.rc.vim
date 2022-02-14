@@ -1,8 +1,3 @@
-inoremap { {}<Left>
-inoremap {<Enter> {}<Left><CR><ESC><S-o>
-inoremap ( ()<Left>
-inoremap (<Enter> ()<Left><CR><ESC><S-o>
-
 let mapleader = "\<Space>"
 
 " easy-motion

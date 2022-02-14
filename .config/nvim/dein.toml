@@ -19,3 +19,6 @@ repo = 'rhysd/clever-f.vim'
 [[plugins]]
 repo = 'machakann/vim-sandwich'
 
+[[plugins]]
+repo = 'cohama/lexima.vim'
+
