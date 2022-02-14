@@ -22,3 +22,12 @@ repo = 'machakann/vim-sandwich'
 [[plugins]]
 repo = 'cohama/lexima.vim'
 
+[[plugins]]
+repo = 'junegunn/fzf'
+build = './install --bin'
+merged = '0'
+
+[[plugins]]
+repo = 'yuki-ycino/fzf-preview.vim'
+rev = 'release/rpc'
+
