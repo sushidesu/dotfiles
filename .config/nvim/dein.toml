@@ -16,3 +16,6 @@ repo = 'unblevable/quick-scope'
 [[plugins]]
 repo = 'rhysd/clever-f.vim'
 
+[[plugins]]
+repo = 'machakann/vim-sandwich'
+
