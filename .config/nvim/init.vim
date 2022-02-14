@@ -24,8 +24,7 @@ if exists('g:vscode')
     call dein#add('asvetliakov/vim-easymotion')
 else
     " ordinary neovim
-    "call dein#add('easymotion/vim-easymotion')
-    "nmap s <Plug>(easymotion-s2)
+    call dein#add('easymotion/vim-easymotion')
 endif
 
 " Required:
