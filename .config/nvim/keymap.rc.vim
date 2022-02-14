@@ -18,3 +18,7 @@ map  <Leader>w <Plug>(easymotion-bd-w)
 " find
 nmap s <Plug>(easymotion-s2)
 
+"" Fern
+nnoremap <silent> <Leader>e :<C-u>Fern . -drawer<CR>
+nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -reveal=%<CR>
+
