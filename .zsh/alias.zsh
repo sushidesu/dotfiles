@@ -12,3 +12,6 @@ alias ainit='xclip -o | xargs oj d && touch main.cpp'
 # vscode
 alias coder='code -r .'
 
+# lazygit
+alias lg='lazygit'
+
