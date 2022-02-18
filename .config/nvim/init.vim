@@ -21,10 +21,10 @@ call dein#load_toml('~/.dotfiles/.config/nvim/dein_lazy.toml', {'lazy': 1})
 " plugins for vscode
 if exists('g:vscode')
     " VSCode extension
-    call dein#add('asvetliakov/vim-easymotion')
+    call dein#add('asvetliakov/vim-easymotion', { 'merged': 0 })
 else
     " ordinary neovim
-    call dein#add('easymotion/vim-easymotion')
+    call dein#add('easymotion/vim-easymotion', { 'merged': 0 })
 endif
 
 " Required:
