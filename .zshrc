@@ -14,6 +14,7 @@ source "$HOME/.zsh/options.zsh"
 # Zinit (Zplugin)
 ZPLUGIN_PATH="$HOME/.zplugin/bin/zplugin.zsh"
 ZINIT_PATH="$HOME/.zinit/bin/zinit.zsh"
+ZINIT_NEW_PATH="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 if [[ -e $ZPLUGIN_PATH ]]; then
   source $ZPLUGIN_PATH
   autoload -Uz _zplugin
@@ -22,9 +23,23 @@ elif [[ -e $ZINIT_PATH ]]; then
   source $ZINIT_PATH
   autoload -Uz _zinit
   (( ${+_comps} )) && _comps[zinit]=_zinit
+elif [[ -e $ZINIT_NEW_PATH ]]; then
+  source $ZINIT_NEW_PATH
+  autoload -Uz _zinit
+  (( ${+_comps} )) && _comps[zinit]=_zinit
 else
   echo "please install zinit!!"
 fi
+
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+### End of Zinit's installer chunk
 
 # plugins
 source "$HOME/.zsh/plugins.zsh"
