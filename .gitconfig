@@ -9,6 +9,8 @@
 	editor = vim -c \"set fenc=utf-8\"
 	ignorecase = false
 	quotepath = false
+[advice]
+	detachedHead = false
 [alias]
 	alias = config --get-regexp ^alias\\.
 	lo = log --oneline -12 --reverse
