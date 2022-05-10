@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ -z $1 ]]; then
+	echo "manyenv [env: 'nodenv' | 'volta']"
+elif [[ $1 == 'nodenv' ]]; then
+	echo "hello nodenv"
+	source $HOME/.manyenv/nodenv.sh
+elif [[ $1 == 'volta' ]]; then
+	echo "hello volta"
+	source $HOME/.manyenv/volta.sh
+else
+	echo "Unknown command: \"$1\""
+fi
+
