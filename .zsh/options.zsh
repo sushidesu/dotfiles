@@ -13,5 +13,5 @@ setopt auto_cd
 function chpwd() { ls } # auto ls
 
 # my scripts
-export PATH="$HOME/.sushidesu/tools:$PATH"
+export PATH="$HOME/tools:$PATH"
 
