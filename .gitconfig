@@ -27,6 +27,7 @@
 	ps = push
 	sw = switch
 	swc = switch -c
+	b = branch
 	ba = branch -a
 	bd = branch -d
 	bdd = branch -D
