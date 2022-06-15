@@ -15,3 +15,6 @@ alias coder='code -r .'
 # lazygit
 alias lg='lazygit'
 
+# npm
+alias nr='npm run'
+
