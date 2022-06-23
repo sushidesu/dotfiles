@@ -22,16 +22,18 @@ set number
 set list
 set listchars=tab:>-,trail:*,nbsp:+
 " インデントとか
-set smartindent
-set autoindent
-set visualbell
+" set smartindent
+" set autoindent
+" set visualbell
+
 " アイコン表示用の幅を確保
 set signcolumn=yes
 
 " タブ関連
 set expandtab " スペースを使う
-set tabstop=4 " 幅4
-set shiftwidth=2 " 幅4
+set tabstop=2
+set shiftwidth=2
+
 " gitconfigではタブを使う
 if expand("%:t") =~ ".*\.gitconfig"
   set noexpandtab
