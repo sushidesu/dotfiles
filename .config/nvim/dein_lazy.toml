@@ -16,3 +16,7 @@ hook_source = 'source ~/.config/nvim/coc-options.vim'
 repo = 'cespare/vim-toml'
 on_ft = ['toml']
 
+[[plugins]]
+repo = 'preservim/vim-markdown'
+on_ft = ['md']
+

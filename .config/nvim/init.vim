@@ -41,6 +41,7 @@ endif
 "End dein Scripts-------------------------
 
 source ~/.config/nvim/keymap.rc.vim
+source ~/.config/nvim/options.rc.vim
 
 " Your .vimrc
 highlight QuickScopePrimary gui=underline
