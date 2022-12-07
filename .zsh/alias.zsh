@@ -17,4 +17,32 @@ alias lg='lazygit'
 
 # npm
 alias nr='npm run'
+alias yw='yarn workspace'
+
+# git
+alias ss='git ss'
+alias cc='git c'
+alias ccc='git c -a'
+alias ca='git ca'
+alias can='git can'
+alias aa='git a'
+alias sw='git sw'
+alias swc='git sw -c'
+alias lo='git lo'
+alias lon='git lo -n'
+alias bb='git b'
+alias ba='git ba'
+alias bd='git bd'
+alias fp='git fp'
+alias gogo='git push'
+alias fpl='git fp && git pull'
+alias gr='git rebase'
+alias gri='git rebase -i'
+alias grc='git rebase --continue'
+alias gra='git rebase --abort'
+alias gogogo='git push -u origin HEAD'
+
+# tools
+alias rewifi='~/box/run refresh'
+
 

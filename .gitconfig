@@ -13,6 +13,9 @@
 	detachedHead = false
 [alias]
 	alias = config --get-regexp ^alias\\.
+	stu = stash -u
+	stp = stash pop
+	stl = stash list
 	lo = log --oneline -12 --reverse
 	logn = log --name-status --oneline -5
 	ss = status
