@@ -34,6 +34,9 @@
 	ba = branch -a
 	bd = branch -d
 	bdd = branch -D
+	; https://zenn.dev/hikarin/articles/f09f655c47053096f196
+	stash-find = !"git fsck --unreachable | awk '/commit/ {print $3}' | xargs git log --merges --no-walk --grep=WIP --all-match"
+	stash-pick = cherry-pick -n -m1
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f
