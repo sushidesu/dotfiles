@@ -34,3 +34,7 @@ rev = 'release/rpc'
 [[plugins]]
 repo = 'mg979/vim-visual-multi'
 
+[[plugins]]
+repo = 'nvim-treesitter/nvim-treesitter'
+hook_post_update = 'TSUpdate'
+
