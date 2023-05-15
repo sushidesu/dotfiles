@@ -5,7 +5,7 @@ repo = 'scrooloose/nerdtree'
 repo = 'lambdalisue/fern.vim'
 
 [[plugins]]
-repo = 'ayu-theme/ayu-vim'
+repo = 'Shatur/neovim-ayu'
 
 [[plugins]]
 repo = 'connorholyday/vim-snazzy'
