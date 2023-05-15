@@ -31,3 +31,6 @@ merged = '0'
 repo = 'yuki-ycino/fzf-preview.vim'
 rev = 'release/rpc'
 
+[[plugins]]
+repo = 'mg979/vim-visual-multi'
+
