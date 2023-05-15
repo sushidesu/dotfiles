@@ -41,7 +41,7 @@ endif
 "End dein Scripts-------------------------
 
 source ~/.config/nvim/keymap.rc.vim
-" source ~/.config/nvim/options.rc.vim
+source ~/.config/nvim/options.rc.vim
 source ~/.config/nvim/plugins/vim-sandwich.vim
 
 " Your .vimrc
