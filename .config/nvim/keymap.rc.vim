@@ -20,3 +20,11 @@ nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -reveal=%<CR>
 "" fzf-preview
 nnoremap <silent> <C-p> :<C-u>FzfPreviewFromResourcesRpc project_mru git<CR>
 
+"" split window
+nnoremap sj <C-w>j
+nnoremap sk <C-w>k
+nnoremap sl <C-w>l
+nnoremap sh <C-w>h
+nnoremap ss :<C-u>sp<CR><C-w>j
+nnoremap sv :<C-u>vs<CR><C-w>l
+
