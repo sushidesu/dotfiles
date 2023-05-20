@@ -44,6 +44,8 @@ source ~/.config/nvim/keymap.rc.vim
 source ~/.config/nvim/options.rc.vim
 source ~/.config/nvim/plugins/vim-sandwich.vim
 luafile ~/.config/nvim/plugins/treesitter.lua
+luafile ~/.config/nvim/plugins/barbar.lua
+source ~/.config/nvim/plugins/fern.vim
 
 " Your .vimrc
 highlight QuickScopePrimary gui=underline

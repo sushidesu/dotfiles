@@ -38,3 +38,13 @@ repo = 'mg979/vim-visual-multi'
 repo = 'nvim-treesitter/nvim-treesitter'
 hook_post_update = 'TSUpdate'
 
+[[plugins]]
+repo = 'nvim-tree/nvim-web-devicons'
+
+[[plugins]]
+repo = 'romgrk/barbar.nvim'
+depends = ['lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons']
+rev = '^1.0.0'
+
+
+
