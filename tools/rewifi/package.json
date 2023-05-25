@@ -1,0 +1,20 @@
+{
+  "name": "rewifi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild main.ts --bundle --platform=node --target=node18 --outdir=build",
+    "start": "pnpm build && node build/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.17.19"
+  },
+  "dependencies": {
+    "got": "^12.6.0",
+    "tough-cookie": "^4.1.2"
+  }
+}
