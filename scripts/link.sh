@@ -1,6 +1,7 @@
 #!/bin/bash
 
 EXCLUDE_PATH=(".git" ".config" "scripts")
+EXCLUDE_FILES=(".DS_Store")
 DOTPATH=$HOME/.dotfiles
 
 # enable echo in color
@@ -59,6 +60,11 @@ function is_exclude() {
   local filename=$1
   for ex in "${EXCLUDE_PATH[@]}"; do
     if [[ $DOTPATH/$ex == $filename ]]; then
+      return 0
+    fi
+  done
+  for name in "${EXCLUDE_FILES[@]}"; do
+    if [[ ${i##*/} == $name ]]; then
       return 0
     fi
   done
