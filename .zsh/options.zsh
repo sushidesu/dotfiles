@@ -20,4 +20,5 @@ function chpwd() { ls } # auto ls
 
 # my scripts
 export PATH="$HOME/tools:$PATH"
+export PATH="$HOME/tools/.entrypoints:$PATH"
 

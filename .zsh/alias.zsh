@@ -41,8 +41,3 @@ alias gri='git rebase -i'
 alias grc='git rebase --continue'
 alias gra='git rebase --abort'
 alias gogogo='git push -u origin HEAD'
-
-# tools
-alias rewifi='~/box/run refresh'
-
-
