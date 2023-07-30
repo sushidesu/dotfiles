@@ -46,5 +46,6 @@ repo = 'romgrk/barbar.nvim'
 depends = ['lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons']
 rev = '^1.0.0'
 
-
+[[plugins]]
+repo = 'monaqa/dial.nvim'
 

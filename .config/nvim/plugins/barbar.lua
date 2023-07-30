@@ -7,4 +7,4 @@ local opts = { noremap = true, silent = true }
 map('n', '<C-h>', '<Cmd>BufferPrevious<CR>', opts)
 map('n', '<C-l>', '<Cmd>BufferNext<CR>', opts)
 -- Close buffer
-map('n', '<C-a>', '<Cmd>BufferClose<CR>', opts)
+-- map('n', '<C-a>', '<Cmd>BufferClose<CR>', opts)
