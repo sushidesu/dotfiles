@@ -14,17 +14,16 @@ call dein#begin('~/.cache/dein')
 " Required:
 call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
 
-" plugins
-call dein#load_toml('~/.dotfiles/.config/nvim/dein.toml', {'lazy': 0})
-call dein#load_toml('~/.dotfiles/.config/nvim/dein_lazy.toml', {'lazy': 1})
 
-" plugins for vscode
 if exists('g:vscode')
-    " VSCode extension
+    " plugins for vscode
     call dein#add('asvetliakov/vim-easymotion', { 'merged': 0 })
+    call dein#load_toml('~/.dotfiles/.config/nvim/dein_vscode.toml', {'lazy': 0 })
 else
-    " ordinary neovim
+    " plugins for nvim
     call dein#add('easymotion/vim-easymotion', { 'merged': 0 })
+    call dein#load_toml('~/.dotfiles/.config/nvim/dein.toml', {'lazy': 0 })
+    call dein#load_toml('~/.dotfiles/.config/nvim/dein_lazy.toml', {'lazy': 1 })
 endif
 
 " Required:
@@ -46,10 +45,10 @@ source ~/.config/nvim/plugins/vim-sandwich.vim
 
 if !exists('g:vscode')
   luafile ~/.config/nvim/plugins/treesitter.lua
+  luafile ~/.config/nvim/plugins/barbar.lua
+  source ~/.config/nvim/plugins/fern.vim
 endif
 
-luafile ~/.config/nvim/plugins/barbar.lua
-source ~/.config/nvim/plugins/fern.vim
 
 " Your .vimrc
 highlight QuickScopePrimary gui=underline
