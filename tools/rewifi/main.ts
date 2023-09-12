@@ -1,6 +1,7 @@
 import got from "got"
 import { CookieJar } from "tough-cookie"
 import { createStarBacksReconnectHandler } from "./shops/starbacks"
+import { createKomedaReconnectHandler } from "./shops/komeda"
 
 const main = async () => {
   const jar = new CookieJar()
@@ -17,9 +18,21 @@ const main = async () => {
   }
 
   // shopの判定と呼び出し
-  console.log("reconnect to starbacks wifi")
-  const starBacksReconnectHandler = createStarBacksReconnectHandler(client)
-  const result = await starBacksReconnectHandler()
+  // <meta http-equiv='refresh' content='1; url=http://www.gstatic.com/generate_204&arubalp=xxxx'> があるなら、komeda
+  const isKomeda = /url=http:\/\/www\.gstatic\.com\/generate_204&arubalp=/.test(
+    generated.body
+  )
+
+  let result = ""
+  if (isKomeda) {
+    console.log("reconnect to komeda wifi")
+    const komedaReconnectHandler = createKomedaReconnectHandler(client)
+    result = await komedaReconnectHandler(generated.body)
+  } else {
+    console.log("reconnect to starbacks wifi")
+    const starBacksReconnectHandler = createStarBacksReconnectHandler(client)
+    result = await starBacksReconnectHandler(generated.body)
+  }
 
   console.log("RESULT")
   console.log(result)
