@@ -2,4 +2,5 @@
 
 cd $DOTPATH/tools/rewifi
 
-pnpm start
+node ./build/main.js
+
