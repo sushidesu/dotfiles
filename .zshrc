@@ -12,6 +12,12 @@ source "$HOME/.zsh/alias.zsh"
 source "$HOME/.zsh/options.zsh"
 
 # Zinit (Zplugin)
+
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+[ ! -d $ZINIT_HOME ] && mkdir -p "$(dirname $ZINIT_HOME)"
+[ ! -d $ZINIT_HOME/.git ] && git clone --filter=blob:none https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+source "${ZINIT_HOME}/zinit.zsh"
+
 ZPLUGIN_PATH="$HOME/.zplugin/bin/zplugin.zsh"
 ZINIT_PATH="$HOME/.zinit/bin/zinit.zsh"
 ZINIT_NEW_PATH="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
