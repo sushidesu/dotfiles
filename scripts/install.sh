@@ -7,7 +7,7 @@ fi
 # enable color
 source $DOTPATH/scripts/colors.sh
 
-DOTFILES_GITHUB="https://github.com/sushidesu/dotfiles.git"
+DOTFILES_GITHUB="git@github.com:sushidesu/dotfiles.git"
 
 function message() {
   echo -e "${C_LGY}------ ${1}${NC}"
