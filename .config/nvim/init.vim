@@ -39,17 +39,15 @@ if dein#check_install()
 endif
 "End dein Scripts-------------------------
 
-" source ~/.config/nvim/keymap.rc.vim
-" source ~/.config/nvim/options.rc.vim
-" source ~/.config/nvim/plugins/vim-sandwich.vim
-" luafile ~/.config/nvim/plugins/dial.lua
-" 
-" if !exists('g:vscode')
-"   luafile ~/.config/nvim/plugins/treesitter.lua
-"   luafile ~/.config/nvim/plugins/barbar.lua
-"   source ~/.config/nvim/plugins/fern.vim
-" endif
-
+if !exists('g:vscode')
+  luafile ~/.config/nvim/plugins/treesitter.lua
+  luafile ~/.config/nvim/plugins/barbar.lua
+  source ~/.config/nvim/plugins/fern.vim
+  source ~/.config/nvim/keymap.rc.vim
+  source ~/.config/nvim/options.rc.vim
+  source ~/.config/nvim/plugins/vim-sandwich.vim
+  luafile ~/.config/nvim/plugins/dial.lua
+endif
 
 " Your .vimrc
 highlight QuickScopePrimary gui=underline
