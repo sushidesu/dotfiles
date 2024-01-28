@@ -14,8 +14,8 @@ map  <Leader>w <Plug>(easymotion-bd-w)
 nmap s <Plug>(easymotion-s2)
 
 "" Fern
-nnoremap <silent> <Leader>e :<C-u>Fern . -drawer<CR>
-nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -reveal=%<CR>
+nnoremap <silent> <Leader>e :<C-u>Fern . -drawer -toggle<CR>
+nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -toggle -reveal=%<CR>
 
 "" fzf-preview
 nnoremap <silent> <C-p> :<C-u>FzfPreviewFromResourcesRpc project_mru git<CR>
