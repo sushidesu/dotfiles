@@ -47,6 +47,8 @@ if !exists('g:vscode')
   source ~/.config/nvim/options.rc.vim
   source ~/.config/nvim/plugins/vim-sandwich.vim
   luafile ~/.config/nvim/plugins/dial.lua
+  luafile ~/.config/nvim/plugins/telescope.lua
+  luafile ~/.config/nvim/plugins/devicons.lua
 endif
 
 " Your .vimrc

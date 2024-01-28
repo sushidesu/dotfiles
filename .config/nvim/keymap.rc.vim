@@ -20,6 +20,12 @@ nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -toggle -reveal=%<CR>
 "" fzf-preview
 nnoremap <silent> <C-p> :<C-u>FzfPreviewFromResourcesRpc project_mru git<CR>
 
+"" telescope
+nnoremap <leader>ff <cmd>Telescope find_files hidden=true<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep hidden=true<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
 "" split window
 nnoremap sj <C-w>j
 nnoremap sk <C-w>k

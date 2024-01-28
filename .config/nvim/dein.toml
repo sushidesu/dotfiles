@@ -41,6 +41,7 @@ hook_post_update = 'TSUpdate'
 [[plugins]]
 repo = 'nvim-tree/nvim-web-devicons'
 
+
 [[plugins]]
 repo = 'romgrk/barbar.nvim'
 depends = ['lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons']
@@ -48,4 +49,11 @@ rev = '^1.0.0'
 
 [[plugins]]
 repo = 'monaqa/dial.nvim'
+
+[[plugins]]
+repo = 'nvim-lua/plenary.nvim'
+
+[[plugins]]
+repo = 'nvim-telescope/telescope.nvim'
+rev = '0.1.5'
 
