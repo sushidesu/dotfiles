@@ -36,12 +36,15 @@ font:
   normal:
     family: "Menlo"
     style: Regular
+    family: "Hack Nerd Font"
   bold:
     family: "Menlo"
     style: Bold
+    family: "Hack Nerd Font"
   italic:
     family: "Menlo"
     style: Italic
+    family: "Hack Nerd Font"
   size: 14.0
 
 env:
