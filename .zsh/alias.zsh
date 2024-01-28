@@ -41,3 +41,8 @@ alias gri='git rebase -i'
 alias grc='git rebase --continue'
 alias gra='git rebase --abort'
 alias gogogo='git push -u origin HEAD'
+
+# always includes dotfiles
+alias rg='rg -.'
+alias fd='fd -H'
+
