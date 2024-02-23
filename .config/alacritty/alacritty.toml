@@ -1,0 +1,46 @@
+[colors.bright]
+black = "#686868"
+blue = "#65bddb"
+cyan = "#9debcf"
+green = "#58c49c"
+magenta = "#f17676"
+red = "#f58c7d"
+white = "#ffffff"
+yellow = "#ffd165"
+
+[colors.normal]
+black = "#212733"
+blue = "#60b8d6"
+cyan = "#98e6ca"
+green = "#53bf97"
+magenta = "#ec7171"
+red = "#f08778"
+white = "#fafafa"
+yellow = "#fdcc60"
+
+[colors.primary]
+background = "#1f2430"
+bright_foreground = "#f28779"
+foreground = "#cbccc6"
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 14.0
+
+[font.bold]
+family = "Menlo"
+style = "Bold"
+
+[font.italic]
+family = "Menlo"
+style = "Italic"
+
+[font.normal]
+family = "Menlo"
+style = "Regular"
+
+[window.padding]
+x = 8
+y = 4
