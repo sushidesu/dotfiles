@@ -28,6 +28,7 @@
 	stl = stash list
 	lo = log --oneline -12 --reverse
 	logn = log --name-status --oneline -5
+	logs = "!f() { git log --reverse \"$1\"..HEAD --pretty=format:'%h' | tr '\\n' ',' | sed 's/,$//'; }; f"
 	ss = status
 	ca = commit --amend
 	can = commit --amend --no-edit
