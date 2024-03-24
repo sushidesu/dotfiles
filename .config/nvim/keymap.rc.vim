@@ -34,3 +34,7 @@ nnoremap sh <C-w>h
 nnoremap ss :<C-u>sp<CR><C-w>j
 nnoremap sv :<C-u>vs<CR><C-w>l
 
+"" snippet
+vnoremap <Leader>cnvj :s/"\(\w+\)":\s*"\(.\+\)"/\1='\2'/g<CR>
+vnoremap <Leader>cnvr :s/\(\w+\)='\(.\+\)'/"\1": "\2"/g<CR>
+
