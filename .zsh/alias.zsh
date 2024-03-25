@@ -46,3 +46,15 @@ alias gogogo='git push -u origin HEAD'
 alias rg='rg -.'
 alias fd='fd -H'
 
+# tmux
+tmxspwn() {
+  tmux new-session -c ~/dev/spwn/main -n '🔥DB' \; \
+    split-window -h \; \
+    new-window -c ~/dev/spwn/main -n '🐸BE' \; \
+    split-window -h \; \
+    split-window -h \; \
+    select-layout even-horizontal \; \
+    new-window -c ~/dev/spwn/main -n '🐥FE' \; \
+    split-window -h \; \
+    new-window -c ~ -n '🐪sandbox' \;
+}
