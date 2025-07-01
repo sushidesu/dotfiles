@@ -19,6 +19,16 @@ alias lg='lazygit'
 alias nr='npm run'
 alias yw='yarn workspace'
 
+# test
+alias testfile='f() { 
+  FILE="$1"
+  BASENAME=$(basename "$FILE")
+  EXT="${BASENAME##*.}"
+  NAMEONLY="${BASENAME%.*}"
+  TESTFILE="${NAMEONLY}.test.${EXT}"
+  npm test -- --silent --coverage --watchAll=false --collectCoverageFrom="$FILE" "$TESTFILE"
+}; f'
+
 # git
 alias ss='git ss'
 alias cc='git c'
@@ -47,14 +57,22 @@ alias rg='rg -.'
 alias fd='fd -H'
 
 # tmux
-tmxspwn() {
-  tmux new-session -c ~/dev/spwn/main -n '🔥DB' \; \
+tmx() {
+  tmux new-session -c $1 -n '🔥DB' \; \
     split-window -h \; \
-    new-window -c ~/dev/spwn/main -n '🐸BE' \; \
+    new-window -c $1 -n '🐸BE' \; \
     split-window -h \; \
     split-window -h \; \
     select-layout even-horizontal \; \
-    new-window -c ~/dev/spwn/main -n '🐥FE' \; \
+    new-window -c $1 -n '🐥FE' \; \
     split-window -h \; \
     new-window -c ~ -n '🐪sandbox' \;
+}
+
+tmxspwn() {
+  tmx ~/dev/spwn/main
+}
+
+tmxsplarate() {
+  tmx ~/dev/splarate-hybrid
 }
