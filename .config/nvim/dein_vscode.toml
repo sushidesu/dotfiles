@@ -1,12 +1,3 @@
-[[plugins]]
-repo = 'unblevable/quick-scope'
-
-[[plugins]]
-repo = 'rhysd/clever-f.vim'
-
-[[plugins]]
-repo = 'machakann/vim-sandwich'
-
-[[plugins]]
-repo = 'mg979/vim-visual-multi'
-
+# VSCode-specific plugins (plugins unique to VSCode usage)
+# Common plugins like quick-scope, clever-f, vim-sandwich, vim-visual-multi
+# are loaded from dein.toml for both regular Neovim and VSCode

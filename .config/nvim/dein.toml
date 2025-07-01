@@ -1,7 +1,4 @@
 [[plugins]]
-repo = 'scrooloose/nerdtree'
-
-[[plugins]]
 repo = 'lambdalisue/fern.vim'
 
 [[plugins]]
@@ -22,14 +19,6 @@ repo = 'machakann/vim-sandwich'
 [[plugins]]
 repo = 'cohama/lexima.vim'
 
-[[plugins]]
-repo = 'junegunn/fzf'
-build = './install --bin'
-merged = '0'
-
-[[plugins]]
-repo = 'yuki-ycino/fzf-preview.vim'
-rev = 'release/rpc'
 
 [[plugins]]
 repo = 'mg979/vim-visual-multi'
