@@ -17,7 +17,7 @@ setopt hist_ignore_all_dups
 setopt hist_ignore_space
 
 setopt auto_cd
-function chpwd() { ls } # auto ls
+# function chpwd() { ls } # auto ls
 
 # my scripts
 export PATH="$HOME/tools/.entrypoints:$PATH"
