@@ -3,7 +3,10 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(gemini:*)",
+      "Bash(nvim:*)",
+      "WebFetch(domain:www.anthropic.com)"
     ],
     "deny": []
   }
