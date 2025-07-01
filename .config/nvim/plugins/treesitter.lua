@@ -18,11 +18,11 @@ treesitter.setup {
   },
   highlight = {
     enable = true,
-    disable = {},
+    disable = { "markdown" },  -- Temporarily disable markdown highlighting due to parser issues
   },
-　indent ={
-　　enable =true,
-　},
+  indent = {
+    enable = true,
+  },
   autotag = {
     enable = true,
   },
