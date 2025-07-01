@@ -68,6 +68,8 @@ if !exists('g:vscode')
   luafile ~/.config/nvim/plugins/dial.lua
   luafile ~/.config/nvim/plugins/telescope.lua
   luafile ~/.config/nvim/plugins/devicons.lua
+else
+  source ~/.config/nvim/keymap.vscode.vim
 endif
 
 " Your .vimrc

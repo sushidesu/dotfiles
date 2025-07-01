@@ -5,8 +5,10 @@ set listchars=eol:$,tab:>-,trail:~,extends:>,precedes:<
 
 if !exists('g:vscode')
     " ordinary neovim
-    set termguicolors
-    colorscheme ayu-mirage
+    " set termguicolors
+    " colorscheme ayu-mirage
+    colorscheme gruvbox
+    set background=dark
 else
     " fold
     " https://github.com/vscode-neovim/vscode-neovim/pull/502#issuecomment-831682643

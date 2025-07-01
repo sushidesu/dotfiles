@@ -57,3 +57,6 @@ repo = 'nvim-lua/plenary.nvim'
 repo = 'nvim-telescope/telescope.nvim'
 rev = '0.1.5'
 
+[[plugins]]
+repo = 'morhetz/gruvbox'
+

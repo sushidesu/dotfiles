@@ -38,3 +38,5 @@ nnoremap sv :<C-u>vs<CR><C-w>l
 vnoremap <Leader>cnvj :s/"\(\w+\)":\s*"\(.\+\)"/\1='\2'/g<CR>
 vnoremap <Leader>cnvr :s/\(\w+\)='\(.\+\)'/"\1": "\2"/g<CR>
 
+"" string to quoted list
+nnoremap <Leader>q :%s/.*/"&"/g \| %s/ /", "/g<CR>
