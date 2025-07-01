@@ -17,10 +17,8 @@ nmap s <Plug>(easymotion-s2)
 nnoremap <silent> <Leader>e :<C-u>Fern . -drawer -toggle<CR>
 nnoremap <silent> <Leader>E :<C-u>Fern . -drawer -toggle -reveal=%<CR>
 
-"" fzf-preview
-nnoremap <silent> <C-p> :<C-u>FzfPreviewFromResourcesRpc project_mru git<CR>
-
 "" telescope
+nnoremap <silent> <C-p> <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>ff <cmd>Telescope find_files hidden=true<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep hidden=true<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
