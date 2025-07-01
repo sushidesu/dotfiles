@@ -52,3 +52,5 @@ source "$HOME/.zsh/plugins.zsh"
 
 export PATH="$HOME/.poetry/bin:$PATH"
 
+
+. "$HOME/.local/bin/env"
