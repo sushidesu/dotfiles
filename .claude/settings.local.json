@@ -6,7 +6,9 @@
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(gemini:*)",
       "Bash(nvim:*)",
-      "WebFetch(domain:www.anthropic.com)"
+      "WebFetch(domain:www.anthropic.com)",
+      "Bash(mv:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
