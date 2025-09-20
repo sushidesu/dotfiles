@@ -25,10 +25,10 @@ set signcolumn=yes
 
 if !exists('g:vscode')
     " ordinary neovim
-    " set termguicolors
-    " colorscheme ayu-mirage
-    colorscheme gruvbox
-    set background=dark
+    set termguicolors
+    colorscheme ayu-mirage
+    " colorscheme gruvbox
+    " set background=dark
 else
     " fold
     " https://github.com/vscode-neovim/vscode-neovim/pull/502#issuecomment-831682643
