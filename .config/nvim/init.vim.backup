@@ -60,7 +60,7 @@ endif
 
 if !exists('g:vscode')
   luafile ~/.config/nvim/plugins/treesitter.lua
-  luafile ~/.config/nvim/plugins/barbar.lua
+  luafile ~/.config/nvim/plugins/bufferline.lua
   source ~/.config/nvim/plugins/fern.vim
   source ~/.config/nvim/keymap.rc.vim
   source ~/.config/nvim/options.rc.vim

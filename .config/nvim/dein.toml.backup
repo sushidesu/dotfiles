@@ -32,9 +32,9 @@ repo = 'nvim-tree/nvim-web-devicons'
 
 
 [[plugins]]
-repo = 'romgrk/barbar.nvim'
-depends = ['lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons']
-rev = '^1.0.0'
+repo = 'akinsho/bufferline.nvim'
+depends = ['nvim-tree/nvim-web-devicons']
+rev = 'v4.*'
 
 [[plugins]]
 repo = 'monaqa/dial.nvim'
@@ -46,6 +46,4 @@ repo = 'nvim-lua/plenary.nvim'
 repo = 'nvim-telescope/telescope.nvim'
 rev = '0.1.5'
 
-[[plugins]]
-repo = 'morhetz/gruvbox'
 
