@@ -1,0 +1,4 @@
+[tools]
+bat = "latest"
+"cargo:sushidesu/dotmux" = "latest"
+jq = "latest"
