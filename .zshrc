@@ -50,7 +50,5 @@ zinit light-mode for \
 # plugins
 source "$HOME/.zsh/plugins.zsh"
 
-export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
-
-. "$HOME/.local/bin/env"

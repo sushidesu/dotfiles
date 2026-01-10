@@ -82,6 +82,17 @@ The `.zshrc` follows a modular loading pattern:
 4. Initialize Zinit plugin manager
 5. Load plugins from `.zsh/plugins.zsh`
 
+### run_at_startup Pattern
+
+Tool-specific initialization scripts are placed in `.zsh/run_at_startup/`:
+- Each tool gets its own file (e.g., `bun.sh`, `pyenv.sh`)
+- Files are auto-sourced by `.zshrc` on startup
+- Simple PATH exports or `eval "$(tool init)"` patterns
+- Easy to add/remove tools by adding/deleting files
+- Performance: minimal overhead (~1ms for all files)
+
+**Important:** `.local/bin` is added to PATH at the **end** of `.zshrc` to ensure brew's python3 takes precedence.
+
 ### Key Tools & Plugins
 - **zinit** - Plugin manager
 - **exa** - Modern `ls` replacement (aliased as default `ls`)
