@@ -8,7 +8,8 @@
       "Bash(nvim:*)",
       "WebFetch(domain:www.anthropic.com)",
       "Bash(mv:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }
