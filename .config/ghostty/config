@@ -1,0 +1,23 @@
+# Ghostty configuration managed by ~/.dotfiles
+# Align font, padding, cursor, and quick terminal behavior with Alacritty
+
+font-family = "Menlo"
+font-family = "Hiragino Sans"
+font-family-bold = "Menlo"
+font-family-bold = "Hiragino Sans"
+font-family-italic = "Menlo"
+font-family-italic = "Hiragino Sans"
+font-family-bold-italic = "Menlo"
+font-family-bold-italic = "Hiragino Sans"
+font-size = 14
+
+window-padding-x = 8
+window-padding-y = 4
+
+cursor-style = bar
+adjust-cursor-thickness = 2
+shell-integration-features = no-cursor
+
+# Quick terminal tweaks
+keybind = global:option+q=toggle_quick_terminal
+quick-terminal-animation-duration = 0
