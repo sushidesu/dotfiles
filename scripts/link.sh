@@ -1,6 +1,6 @@
 #!/bin/bash
 
-EXCLUDE_PATH=(".git" ".config" "scripts")
+EXCLUDE_PATH=(".git" ".config" ".claude" ".codex" "scripts")
 EXCLUDE_FILES=(".DS_Store")
 DOTPATH=$HOME/.dotfiles
 
@@ -41,6 +41,20 @@ function linking() {
   fi
 }
 
+function linking_dir() {
+  local from_name=$1
+  local to_name=$2
+
+  # validation for idempotence
+  if [ -h $to_name ]; then
+    message_skip "${to_name} is already linked"
+  elif [ -d $to_name ]; then
+    message_skip "${to_name} is directory"
+  else
+    message_link $from_name $to_name
+    ln -s $from_name $to_name
+  fi
+}
 function list_dir() {
   local target_dir=$1
   local function_receives_filename=$2
@@ -76,9 +90,24 @@ function message() {
   echo -e "${C_LGY}------ LINK \"${target}\"${NC}"
 }
 
+function ensure_dir() {
+  local dir=$1
+  if [ ! -d "$dir" ]; then
+    mkdir -p "$dir"
+  fi
+}
+
 message "\$DOTPATH/*"
 link_anywhere $DOTPATH $HOME
 
-message "\$DOTPATH/config/*"
+message "\$DOTPATH/.config/*"
+ensure_dir "$HOME/.config"
 link_anywhere $DOTPATH/.config $HOME/.config
 
+message "\$DOTPATH/.claude/commands/*"
+ensure_dir "$HOME/.claude"
+linking_dir "$DOTPATH/.claude/commands" "$HOME/.claude/commands"
+
+message "\$DOTPATH/.claude/commands -> ~/.codex/prompts"
+ensure_dir "$HOME/.codex"
+linking_dir "$DOTPATH/.claude/commands" "$HOME/.codex/prompts"
