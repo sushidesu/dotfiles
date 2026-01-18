@@ -1,4 +1,5 @@
 [tools]
+"aqua:codex" = "latest"
 bat = "latest"
 "cargo:sushidesu/dotmux" = "latest"
 jq = "latest"
