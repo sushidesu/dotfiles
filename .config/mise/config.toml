@@ -2,4 +2,5 @@
 "aqua:codex" = "latest"
 bat = "latest"
 "cargo:sushidesu/dotmux" = "latest"
+"cargo:sushidesu/kitchen-cli" = "latest"
 jq = "latest"
