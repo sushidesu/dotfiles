@@ -57,16 +57,25 @@ alias rg='rg -.'
 alias fd='fd -H'
 
 # tmux
+alias t='tmux'
+alias ta='tmux attach -t'
+alias td='tmux detach'
+alias tls='tmux ls'
+
+tmxmain() {
+  tmux has-session -t main 2>/dev/null && tmux attach -t main || tmux new -s main
+}
+
 tmx() {
-  tmux new-session -c $1 -n '🔥DB' \; \
-    split-window -h \; \
-    new-window -c $1 -n '🐸BE' \; \
-    split-window -h \; \
-    split-window -h \; \
-    select-layout even-horizontal \; \
-    new-window -c $1 -n '🐥FE' \; \
-    split-window -h \; \
-    new-window -c ~ -n '🐪sandbox' \;
+  local name
+  local dir="${1:-$PWD}"
+  name="$(basename "$dir")"
+  if tmux has-session -t "$name" 2>/dev/null; then
+    tmux switch-client -t "$name"
+  else
+    tmux new-session -d -s "$name" -c "$dir"
+    tmux switch-client -t "$name"
+  fi
 }
 
 tmxspwn() {
