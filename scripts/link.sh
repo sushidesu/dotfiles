@@ -111,3 +111,11 @@ linking_dir "$DOTPATH/.claude/commands" "$HOME/.claude/commands"
 message "\$DOTPATH/.claude/commands -> ~/.codex/prompts"
 ensure_dir "$HOME/.codex"
 linking_dir "$DOTPATH/.claude/commands" "$HOME/.codex/prompts"
+
+message "\$DOTPATH/.claude/skills/*"
+ensure_dir "$HOME/.claude"
+linking_dir "$DOTPATH/.claude/skills" "$HOME/.claude/skills"
+
+message "\$DOTPATH/.claude/skills -> ~/.codex/skills"
+ensure_dir "$HOME/.codex"
+linking_dir "$DOTPATH/.claude/skills" "$HOME/.codex/skills"
