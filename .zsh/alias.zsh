@@ -58,30 +58,6 @@ alias fd='fd -H'
 
 # tmux
 alias t='tmux'
-alias ta='tmux attach -t'
+alias tas='tmux attach -t'
 alias td='tmux detach'
 alias tls='tmux ls'
-
-tmxmain() {
-  tmux has-session -t main 2>/dev/null && tmux attach -t main || tmux new -s main
-}
-
-tmx() {
-  local name
-  local dir="${1:-$PWD}"
-  name="$(basename "$dir")"
-  if tmux has-session -t "$name" 2>/dev/null; then
-    tmux switch-client -t "$name"
-  else
-    tmux new-session -d -s "$name" -c "$dir"
-    tmux switch-client -t "$name"
-  fi
-}
-
-tmxspwn() {
-  tmx ~/dev/spwn/main
-}
-
-tmxsplarate() {
-  tmx ~/dev/splarate-hybrid
-}

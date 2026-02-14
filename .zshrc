@@ -50,5 +50,7 @@ zinit light-mode for \
 # plugins
 source "$HOME/.zsh/plugins.zsh"
 
-export PATH="$HOME/.local/bin:$PATH"
+# functions
+source "$HOME/.zsh/functions.zsh"
 
+export PATH="$HOME/.local/bin:$PATH"
