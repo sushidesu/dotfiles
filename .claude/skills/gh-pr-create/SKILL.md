@@ -18,6 +18,7 @@ Use this skill when asked to create a PR using `gh pr create` and the repo’s P
 
 2. **Confirm template**
    - Read `.github/PULL_REQUEST_TEMPLATE.md` to align sections.
+   - If template exists, write it to a tmp file first (for example: `/tmp/pr-body-<branch>.md`) and edit that file.
    - If template missing, proceed with a minimal body.
 
 3. **Prepare PR body**
@@ -30,13 +31,15 @@ Use this skill when asked to create a PR using `gh pr create` and the repo’s P
      - E2E: `未実施`
      - Manual: `1. 未実施`
    - Keep sections and wording consistent with the template when one exists.
+   - When a template exists, always edit the tmp body file and keep it as the single source of truth for PR body.
 
 4. **Decide optional steps**
    - Push branch only if not already pushed.
    - Create PR only if not already exists.
 
 5. **Create PR**
-   - Use `gh pr create --base <base> --head <branch> --title <title> --body <body>`.
+   - If using a template, pass the edited tmp file: `gh pr create --base <base> --head <branch> --title <title> --body-file <tmp-file>`.
+   - If no template, use `gh pr create --base <base> --head <branch> --title <title> --body <body>`.
    - Base defaults to the user’s target branch (e.g., `develop`). Ask if unclear.
    - When building `--body`, pass real newlines (not `\n` escapes). Use a heredoc / multiline string.
 
@@ -53,6 +56,10 @@ Use this skill when asked to create a PR using `gh pr create` and the repo’s P
   - Under 50 characters
   - No trailing period
   - Omit scope unless it adds clarity
+- **Writing style for PR body**:
+  - Keep text concise and use bullet points.
+  - Do not use polite Japanese style (`です` / `ます`).
+  - Do not use Japanese full stop (`。`).
 - Do not overwrite template sections beyond what the user requested.
 - If the user wants background only, keep other sections untouched.
 - If the user says “auto-generate details,” keep `pr_agent:summary` and do not edit it.
@@ -70,3 +77,4 @@ Use this skill when asked to create a PR using `gh pr create` and the repo’s P
 
 - If the PR body is passed as a single-line string containing `\\n`, zsh will not expand it, and gh may truncate the body.
 - Prefer a heredoc / multiline string so real newlines are passed.
+- When a template exists, prefer `--body-file` with a tmp markdown file instead of inline `--body`.
