@@ -26,6 +26,15 @@ Create a concise conventional commit based on staged changes. Follow repo conven
    - Normal changes: `type(scope): description` when scope helps clarity.
 5. Commit with `git commit -m "..."`.
 
+## Codex-specific execution rules
+
+- In Codex, treat `git add` and `git commit` as operations that usually require escalation approval.
+- Do not chain commit-related commands in one shell invocation.
+- Run commit-related operations as separate commands in order:
+  1. `git add ...`
+  2. `git diff --cached`
+  3. `git commit -m "..."`
+
 ## Guardrails
 
 - Be concise; avoid bodies unless needed for complex changes.
