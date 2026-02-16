@@ -1,5 +1,5 @@
 ---
-name: commit
+name: cc
 description: Create a concise conventional commit for the current repo. Use when the user says to commit (e.g., "commitして", "commit", "make a commit") and expects a git commit message and `git commit -m` execution.
 ---
 
