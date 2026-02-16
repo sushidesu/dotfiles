@@ -3,5 +3,6 @@
 bat = "latest"
 "cargo:sushidesu/dotmux" = "latest"
 "cargo:sushidesu/kitchen-cli" = "latest"
+duckdb = "latest"
 jq = "latest"
 zellij = "latest"
