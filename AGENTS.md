@@ -51,10 +51,6 @@ Collection of custom shell scripts and utilities:
 - `tmux/` - Tmux configuration
 - `alacritty/`, `skhd/`, `yabai/` - Other application configs
 
-### Claude Commands (`.claude/commands/`)
-Custom slash commands for Claude Code:
-- `/commit` - Creates concise conventional commits without Co-Author-By tags
-
 ## Git Configuration
 
 Uses delta as the diff pager with the following conventions:
