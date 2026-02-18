@@ -1,4 +1,4 @@
 interface:
   display_name: "Tasklist Review"
   short_description: "Review tasks.md for autonomous execution"
-  default_prompt: "Use $tasklist-review to review tasks.md and rewrite blocking tasks so an agent can execute without stopping."
+  default_prompt: "Use $tasklist-review to review tasks.md, directly fix blocker/major issues in the file, and report strengths, findings, and fix rationales without pasting full rewrite text."

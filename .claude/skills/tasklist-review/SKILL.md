@@ -1,11 +1,11 @@
 ---
 name: tasklist-review
-description: Review `tasks.md` (or equivalent implementation task lists) for autonomous agent execution readiness and missing viewpoints. Use when the user asks to review, improve, or lint a task list/TODO so an agent can continue without blocking confirmations.
+description: Review `tasks.md` (or equivalent implementation task lists) for autonomous agent execution readiness, directly fix blocker/major issues, and report findings with rationale without pasting full rewrite text.
 ---
 
 # Tasklist Review
 
-Review `tasks.md` and report whether each task is executable by an autonomous agent without stopping.
+Review `tasks.md` and make it executable by an autonomous agent without stopping.
 
 ## Workflow
 
@@ -16,7 +16,8 @@ Review `tasks.md` and report whether each task is executable by an autonomous ag
    - `blocker`: likely to stop implementation flow
    - `major`: high risk of rework or wrong implementation
    - `minor`: quality issue but unlikely to block
-5. Propose concrete rewrites for each `blocker`/`major` item.
+5. Directly edit `tasks.md` to fix every `blocker` and `major` item.
+6. Keep `minor` items as report-only unless they can be fixed with a tiny, low-risk wording change.
 
 ## Checklist
 
@@ -43,14 +44,19 @@ Confirm task list coverage for:
 
 Output in this order:
 
-1. `Readiness summary` with overall verdict (`ready` / `needs-fixes`) and blocker count.
-2. `Findings` grouped by severity with task label, failed checklist item, and evidence.
-3. `Rewrite proposals` that can be copied into `tasks.md` directly.
-4. `Coverage gaps` for missing cross-cutting tasks (precheck, error handling, consistency sync).
+1. `Readiness summary` with overall verdict (`ready` / `needs-fixes`) and counts by severity.
+2. `Strengths` listing what is already good in the current task list.
+3. `Findings` grouped by severity with task label, failed checklist item, and brief evidence.
+4. `Applied fixes` listing what was changed in `tasks.md`, with one-line rationale per fix.
+5. `Remaining risks` listing unresolved `minor` items only.
+6. `Coverage gaps` for any missing cross-cutting tasks (precheck, error handling, consistency sync).
+
+Do not include full rewritten task text in the response. Summarize changes and rationale only.
 
 ## Guardrails
 
 - Prefer assumptions plus explicit notes over stopping for clarification.
-- If information is missing, state the exact missing field and provide a default rewrite.
-- Keep rewrite proposals minimal but executable.
-- Treat "test task only at the end" as a `blocker` and propose embedding test steps into each implementation task.
+- If information is missing, apply a reasonable default directly in `tasks.md` and mention it with rationale in `Applied fixes`.
+- Keep edits minimal but executable.
+- Treat "test task only at the end" as a `blocker` and embed test steps into each implementation task.
+- Never paste full-file or full-section rewrites in the response; summarize diffs only.
