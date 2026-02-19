@@ -38,6 +38,7 @@ Confirm task list coverage for:
 - Preconditions check exists (current tests/type-check pass status before implementation).
 - Error-handling policy exists.
 - Consistency between design policy and task list exists.
+- Documentation update is required only when the task includes technology selection records or external research results; otherwise treat docs update as optional.
 - Task granularity is appropriate (`1 task ~= 1 commit`).
 
 ## Output Format
@@ -59,4 +60,5 @@ Do not include full rewritten task text in the response. Summarize changes and r
 - If information is missing, apply a reasonable default directly in `tasks.md` and mention it with rationale in `Applied fixes`.
 - Keep edits minimal but executable.
 - Treat "test task only at the end" as a `blocker` and embed test steps into each implementation task.
+- Do not raise missing docs updates as `blocker`/`major` unless the task explicitly requires recording technology decisions or external investigation outcomes.
 - Never paste full-file or full-section rewrites in the response; summarize diffs only.
