@@ -10,9 +10,6 @@ _tmux_session_name_from_dir() {
   if [[ "$name" == .* ]]; then
     name="_${name#.}"
   fi
-  if [[ -z "$name" ]]; then
-    name="root"
-  fi
 
   # Keep session names tmux-friendly and easy to target.
   name="${name//[^A-Za-z0-9_-]/-}"
@@ -42,7 +39,13 @@ _tmux_open_session_for_dir() {
 }
 
 ta() {
-  _tmux_open_session_for_dir "$1"
+  local dir_input="$1"
+
+  if [[ -z "$dir_input" && ! -t 0 ]]; then
+    IFS= read -r dir_input
+  fi
+
+  _tmux_open_session_for_dir "$dir_input"
 }
 
 _register_tmux_dir_completions() {
