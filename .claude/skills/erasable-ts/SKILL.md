@@ -1,6 +1,6 @@
 ---
 name: erasable-ts
-description: TypeScript restrictions for Node.js native type stripping projects. Use when writing or reviewing TypeScript in a project that runs without tsx/ts-node (i.e., uses Node.js native type stripping), or when tsconfig has `erasableSyntaxOnly: true`.
+description: "TypeScript restrictions for Node.js native type stripping projects. Use when writing or reviewing TypeScript in a project that runs without tsx/ts-node (i.e., uses Node.js native type stripping), or when tsconfig has erasableSyntaxOnly: true."
 version: 1.0.0
 ---
 
