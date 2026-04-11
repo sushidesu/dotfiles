@@ -76,3 +76,15 @@ else
   autoload -Uz add-zsh-hook
   add-zsh-hook precmd _register_tmux_dir_completions
 fi
+
+# Sync tmux server's global PATH with the current shell's PATH.
+# Useful after installing new tools via mise — the tmux server's env is
+# frozen at startup and won't pick up new install dirs until reloaded.
+# Like `prefix + r` reloads tmux.conf, this reloads env vars.
+tmux-reload-env() {
+  if ! command -v tmux >/dev/null 2>&1; then
+    print -u2 "tmux-reload-env: tmux not found"
+    return 1
+  fi
+  tmux set-environment -g PATH "$PATH"
+}
