@@ -45,6 +45,16 @@ ta() {
     IFS= read -r dir_input
   fi
 
+  if [[ -z "$dir_input" ]]; then
+    local picker="$HOME/.dotfiles/tools/ta-pick.sh"
+    if [[ -x "$picker" ]]; then
+      "$picker"
+      return $?
+    fi
+    print -u2 "ta: picker not found at $picker"
+    return 1
+  fi
+
   _tmux_open_session_for_dir "$dir_input"
 }
 
