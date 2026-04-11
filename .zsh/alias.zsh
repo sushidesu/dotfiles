@@ -5,6 +5,9 @@ alias la='exa -1 --sort Extension -a'
 alias lat='la -T -L=2'
 alias vim='nvim'
 
+# shell
+alias reload-shell='exec $SHELL -l'
+
 # 競プロ用
 alias atest='g++ main.cpp && oj t'
 alias ainit='xclip -o | xargs oj d && touch main.cpp'
