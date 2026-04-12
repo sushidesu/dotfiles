@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# ta-pick.sh — interactive tmux session picker.
+# ta-pick — interactive tmux session picker.
 #
 # Sources candidates from:
 #   - existing tmux sessions (MRU order)
 #   - zoxide frecent directories (deduped against session paths)
+#   - ~/dev/ subdirectories (deduped against above)
 #
 # On selection:
 #   - existing session → switch-client / attach-session
@@ -40,15 +41,31 @@ candidates() {
     )
   fi
 
+  local seen_paths="$session_paths"
+
   if command -v zoxide >/dev/null 2>&1; then
     while IFS= read -r path; do
       [[ -z "$path" ]] && continue
-      case $'\n'"$session_paths" in
+      case $'\n'"$seen_paths" in
+        *$'\n'"$path"$'\n'*) continue ;;
+      esac
+      seen_paths+="$path"$'\n'
+      short="${path/#$HOME/~}"
+      printf 'D\t-\t%s\t    %s\n' "$path" "$short"
+    done < <(zoxide query -l 2>/dev/null)
+  fi
+
+  local dev_dir="$HOME/dev"
+  if [[ -d "$dev_dir" ]]; then
+    for path in "$dev_dir"/*/; do
+      [[ -d "$path" ]] || continue
+      path="${path%/}"
+      case $'\n'"$seen_paths" in
         *$'\n'"$path"$'\n'*) continue ;;
       esac
       short="${path/#$HOME/~}"
       printf 'D\t-\t%s\t    %s\n' "$path" "$short"
-    done < <(zoxide query -l 2>/dev/null)
+    done
   fi
 }
 
@@ -60,7 +77,31 @@ selected=$(
     --height=60% \
     --reverse \
     --prompt='ta> ' \
-    --preview='p={3}; printf "path: %s\n\n" "$p"; if [ -d "$p" ]; then (cd "$p" && git rev-parse --abbrev-ref HEAD 2>/dev/null | sed "s/^/branch: /"); echo; ls -A "$p" 2>/dev/null | head -40; fi' \
+    --preview='
+      t={1}; n={2}; p={3};
+      if [ "$t" = "S" ]; then
+        printf "=== session: %s ===\n%s\n\n" "$n" "$p";
+        tmux capture-pane -t "$n" -p 2>/dev/null || echo "(no pane output)";
+      else
+        printf "=== %s ===\n\n" "$p";
+        if [ -d "$p" ]; then
+          cd "$p" 2>/dev/null || exit;
+          branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null);
+          if [ -n "$branch" ]; then
+            printf "branch: %s\n\n" "$branch";
+            st=$(git status -s 2>/dev/null);
+            if [ -n "$st" ]; then
+              printf "changes:\n%s\n\n" "$st";
+            fi;
+            printf "recent commits:\n";
+            git log --oneline -5 2>/dev/null;
+          else
+            ls -A 2>/dev/null | head -30;
+          fi;
+        else
+          echo "(not a directory)";
+        fi;
+      fi' \
     --preview-window='right,50%,wrap'
 ) || exit 0
 
