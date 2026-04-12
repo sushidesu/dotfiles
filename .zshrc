@@ -6,7 +6,7 @@ for i in $HOME/.zsh/run_at_startup/*; do
 done;
 
 # alias
-source "$HOME/.zsh/alias.zsh"
+source "$HOME/.zsh/aliases.zsh"
 
 # user options
 source "$HOME/.zsh/options.zsh"

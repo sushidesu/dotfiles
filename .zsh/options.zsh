@@ -20,5 +20,5 @@ setopt auto_cd
 # function chpwd() { ls } # auto ls
 
 # my scripts
-export PATH="$HOME/tools/.entrypoints:$PATH"
+export PATH="$HOME/bin:$PATH"
 

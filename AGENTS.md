@@ -31,19 +31,19 @@ Creates symlinks from `.dotfiles/*` to `~/*` and `.dotfiles/.config/*` to `~/.co
 ### Core Configuration
 - `.zshrc` - Main shell initialization file
 - `.zsh/` - Modular zsh configuration
-  - `alias.zsh` - Command aliases and shell functions
+  - `aliases.zsh` - Command aliases
+  - `functions.zsh` - Shell functions
   - `options.zsh` - Zsh options
   - `plugins.zsh` - Zinit plugin definitions
   - `run_at_startup/` - Language/tool initializers (fnm, pyenv, goenv, etc.)
 - `.gitconfig` - Git configuration with custom aliases and delta diff viewer
 
-### Tools (`tools/`)
-Collection of custom shell scripts and utilities:
-- `ping.sh` - Wi-Fi connection monitor with configurable environment variables (IFACE, TARGET, PING_TIMEOUT_MS, SLOW_THRESHOLD_MS, SLEEP_SEC, SHOW_SSID)
-- `cleanup-local-branches.sh` - Deletes local git branches that don't exist on remote (use `--fix` flag to actually delete)
-- `get-mid-commit.sh` - Finds midpoint commit(s) between two git hashes
-- `rewifi/` - Node.js/TypeScript tool for Wi-Fi automation (uses esbuild, got, tough-cookie)
-- `.entrypoints/` - Symlinked executables that can be added to PATH
+### Executables (`bin/`)
+External commands (shell scripts) placed on PATH via `~/bin`:
+- `wping` - Wi-Fi connection monitor with configurable environment variables (IFACE, TARGET, PING_TIMEOUT_MS, SLOW_THRESHOLD_MS, SLEEP_SEC, SHOW_SSID)
+- `cleanup-local-branches` - Deletes local git branches that don't exist on remote (use `--fix` flag to actually delete)
+- `get-mid-commit` - Finds midpoint commit(s) between two git hashes
+- `ta-pick` - Interactive tmux session picker (fzf-based)
 
 ### Application Configs (`.config/`)
 - `nvim/` - Neovim configuration with Lazy.nvim plugin manager
@@ -59,7 +59,7 @@ Uses delta as the diff pager with the following conventions:
 - Case-sensitive filenames (`ignorecase = false`)
 
 ### Common Git Aliases
-Defined in `.gitconfig` and aliased further in `.zsh/alias.zsh`:
+Defined in `.gitconfig` and aliased further in `.zsh/aliases.zsh`:
 - `git ss` / `ss` - status
 - `git lo` - log --oneline last 12 commits (reversed)
 - `git ca` / `ca` - commit --amend
@@ -73,7 +73,7 @@ Defined in `.gitconfig` and aliased further in `.zsh/alias.zsh`:
 
 The `.zshrc` follows a modular loading pattern:
 1. Load startup scripts from `.zsh/run_at_startup/` (language version managers)
-2. Load aliases from `.zsh/alias.zsh`
+2. Load aliases from `.zsh/aliases.zsh`
 3. Load options from `.zsh/options.zsh`
 4. Initialize Zinit plugin manager
 5. Load plugins from `.zsh/plugins.zsh`
@@ -100,26 +100,15 @@ Tool-specific initialization scripts are placed in `.zsh/run_at_startup/`:
 
 ## Development Workflows
 
-### Working with rewifi
-```bash
-cd tools/rewifi
-pnpm build    # Build with esbuild
-pnpm start    # Run built version
-pnpm dev      # Build and run
-```
-
 ### Shell Customization
 When modifying shell configuration:
-- Add new aliases to `.zsh/alias.zsh`
+- Add new aliases to `.zsh/aliases.zsh`
 - Add zsh options to `.zsh/options.zsh`
 - Add plugins to `.zsh/plugins.zsh`
 - Add language/tool initializers to `.zsh/run_at_startup/`
 
-### Creating New Tools
-Place scripts in `tools/` directory. For scripts that should be executable from anywhere:
-1. Create executable script in `tools/`
-2. Create symlink in `tools/.entrypoints/`
-3. Add `tools/.entrypoints` to PATH
+### Creating New External Commands
+Place executable scripts (without file extension) in `bin/` directory. The `~/bin` directory is on PATH, so they are available immediately.
 
 ## Commit Conventions
 

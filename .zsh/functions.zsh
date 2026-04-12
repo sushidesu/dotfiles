@@ -46,7 +46,7 @@ ta() {
   fi
 
   if [[ -z "$dir_input" ]]; then
-    local picker="$HOME/.dotfiles/tools/ta-pick.sh"
+    local picker="$HOME/.dotfiles/bin/ta-pick"
     if [[ -x "$picker" ]]; then
       "$picker"
       return $?

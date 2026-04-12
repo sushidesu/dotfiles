@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-cd $DOTPATH/tools/rewifi
-
-node ./build/main.js
-
