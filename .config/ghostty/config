@@ -1,14 +1,75 @@
 # Ghostty configuration managed by ~/.dotfiles
-# Align font, padding, cursor, and quick terminal behavior with Alacritty
+# Theme: ayu-mirage (from Terminal.app profile)
 
+# Font — Terminal.app: Menlo-Regular 14pt
 font-family = "Hack Nerd Font Mono"
 font-family = "Hiragino Sans W3"
 font-size = 14
-adjust-cell-width = -3%
 
+# Terminal.app FontWidthSpacing: 1.004032258064516 (~+0.4%)
+# Ghostty's base cell width differs from Terminal.app; adjusted to match visually
+adjust-cell-width = -1
+
+# Thicken font strokes to match Terminal.app rendering
+font-thicken = true
+
+# Background — Terminal.app BackgroundColor: rgb(0.1216, 0.1412, 0.1882)
+background = #1f2430
+
+# Foreground — Terminal.app TextColor: rgb(0.7961, 0.8000, 0.7765)
+foreground = #cbccc6
+
+# Cursor — Terminal.app CursorColor: rgb(1.0000, 0.8000, 0.4000)
+cursor-color = #ffcc66
+
+# Selection — Terminal.app SelectionColor: rgb(0.1647, 0.2078, 0.2745)
+selection-background = #2a3546
+
+# Note: Terminal.app TextBoldColor (#5c6773) has no Ghostty equivalent
+
+# ANSI palette — ayu-mirage
+# 0: ANSIBlackColor rgb(0.1020, 0.1176, 0.1608)
+palette = 0=#1a1e29
+# 1: ANSIRedColor rgb(0.9490, 0.5294, 0.4745)
+palette = 1=#f28779
+# 2: ANSIGreenColor rgb(0.7294, 0.9020, 0.4941)
+palette = 2=#bae67e
+# 3: ANSIYellowColor rgb(1.0000, 0.8353, 0.5020)
+palette = 3=#ffd580
+# 4: ANSIBlueColor rgb(0.4510, 0.8157, 1.0000)
+palette = 4=#73d0ff
+# 5: ANSIMagentaColor rgb(0.8314, 0.7490, 1.0000)
+palette = 5=#d4bfff
+# 6: ANSICyanColor rgb(0.5843, 0.9020, 0.7961)
+palette = 6=#95e6cb
+# 7: ANSIWhiteColor rgb(0.7804, 0.7804, 0.7804)
+palette = 7=#c7c7c7
+# 8: ANSIBrightBlackColor rgb(0.4078, 0.4078, 0.4078)
+palette = 8=#686868
+# 9: ANSIBrightRedColor rgb(0.9490, 0.5294, 0.4745)
+palette = 9=#f28779
+# 10: ANSIBrightGreenColor rgb(0.7294, 0.9020, 0.4941)
+palette = 10=#bae67e
+# 11: ANSIBrightYellowColor rgb(1.0000, 0.8353, 0.5020)
+palette = 11=#ffd580
+# 12: ANSIBrightBlueColor rgb(0.4510, 0.8157, 1.0000)
+palette = 12=#73d0ff
+# 13: ANSIBrightMagentaColor rgb(0.8314, 0.7490, 1.0000)
+palette = 13=#d4bfff
+# 14: ANSIBrightCyanColor rgb(0.5843, 0.9020, 0.7961)
+palette = 14=#95e6cb
+# 15: ANSIBrightWhiteColor rgb(1.0000, 1.0000, 1.0000)
+palette = 15=#ffffff
+
+# Window size — Terminal.app columnCount: 120, rowCount: 40
+window-width = 120
+window-height = 40
+
+# Padding
 window-padding-x = 8
 window-padding-y = 4
 
+# Cursor
 cursor-style = block
 adjust-cursor-thickness = 2
 shell-integration-features = no-cursor
