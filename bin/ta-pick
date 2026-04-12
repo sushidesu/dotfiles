@@ -47,7 +47,7 @@ candidates() {
         *$'\n'"$path"$'\n'*) continue ;;
       esac
       short="${path/#$HOME/~}"
-      printf 'D\t\t%s\t    %s\n' "$path" "$short"
+      printf 'D\t-\t%s\t    %s\n' "$path" "$short"
     done < <(zoxide query -l 2>/dev/null)
   fi
 }
