@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ta-new — create a new project directory in ~/dev and start a tmux session.
+#
+# Usage: ta-new <name>
+
+set -euo pipefail
+
+if [[ -z "${1:-}" ]]; then
+  printf 'usage: ta-new <name>\n' >&2
+  exit 1
+fi
+
+dev_dir="$HOME/dev/$1"
+mkdir -p "$dev_dir"
+abs=$(cd "$dev_dir" && pwd -P)
+
+name="${abs##*/}"
+name="${name//[^A-Za-z0-9_-]/-}"
+
+if ! tmux has-session -t "=$name" 2>/dev/null; then
+  tmux new-session -d -s "$name" -c "$abs"
+fi
+
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t "=$name"
+else
+  tmux attach-session -t "=$name"
+fi
