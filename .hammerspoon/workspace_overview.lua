@@ -19,6 +19,7 @@ M.config = {
     windowGap = 6,
     cornerRadius = 10,
     maxColumns = 5,
+    dragThreshold = 8,
 }
 
 local canvas = nil
@@ -28,6 +29,13 @@ local triggerHotkey = nil
 local cellMap = {}
 local selectedIndex = 1
 local gridCols = 1
+
+local mouseEventTap = nil
+local dragSourceIndex = nil
+local dragActive = false
+local dragStartPos = nil
+local dragTargetIndex = nil
+
 
 local function gatherWorkspaces()
     local focusedWs = hs.execute(AEROSPACE_PATH .. " list-workspaces --focused"):gsub("%s+$", "")
@@ -45,9 +53,10 @@ local function gatherWorkspaces()
             if not seen[ws] then
                 seen[ws] = true
                 table.insert(order, ws)
-                byWs[ws] = { name = ws, windows = {}, isFocused = (ws == focusedWs) }
+                byWs[ws] = { name = ws, windows = {}, windowIds = {}, isFocused = (ws == focusedWs) }
             end
             local id = tonumber(idStr)
+            table.insert(byWs[ws].windowIds, id)
             local win = hs.window.get(id)
             if win then
                 local snap = win:snapshot()
@@ -69,6 +78,15 @@ local function gatherWorkspaces()
         end
     end
 
+    for i = 1, 10 do
+        local name = tostring(i)
+        if not seen[name] then
+            seen[name] = true
+            table.insert(order, name)
+            byWs[name] = { name = name, windows = {}, windowIds = {}, isFocused = (name == focusedWs) }
+        end
+    end
+
     table.sort(order, function(a, b)
         local na, nb = tonumber(a), tonumber(b)
         if na and nb then return na < nb end
@@ -79,7 +97,8 @@ local function gatherWorkspaces()
 
     local result = {}
     for _, ws in ipairs(order) do
-        if #byWs[ws].windows > 0 or byWs[ws].isFocused then
+        local n = tonumber(ws)
+        if #byWs[ws].windows > 0 or byWs[ws].isFocused or (n and n >= 1 and n <= 10) then
             table.insert(result, byWs[ws])
         end
     end
@@ -171,6 +190,202 @@ local function confirmSelection()
     end
 end
 
+local function findCellAtPoint(x, y)
+    for i, cell in ipairs(cellMap) do
+        if x >= cell.x and x <= cell.x + cell.w
+            and y >= cell.y and y <= cell.y + cell.h then
+            return i
+        end
+    end
+    return nil
+end
+
+local function swapWorkspaces(idxA, idxB, callback)
+    local cellA = cellMap[idxA]
+    local cellB = cellMap[idxB]
+    if not cellA or not cellB then
+        if callback then callback() end
+        return
+    end
+
+    local commands = {}
+    for _, wid in ipairs(cellA.windowIds) do
+        table.insert(commands, { "move-node-to-workspace", "--window-id", tostring(wid), cellB.workspace })
+    end
+    for _, wid in ipairs(cellB.windowIds) do
+        table.insert(commands, { "move-node-to-workspace", "--window-id", tostring(wid), cellA.workspace })
+    end
+
+    if #commands == 0 then
+        if callback then callback() end
+        return
+    end
+
+    local remaining = #commands
+    local function onTaskDone()
+        remaining = remaining - 1
+        if remaining == 0 and callback then
+            callback()
+        end
+    end
+    for _, cmd in ipairs(commands) do
+        local task = hs.task.new(AEROSPACE_PATH, onTaskDone, cmd)
+        if task then
+            task:start()
+        else
+            onTaskDone()
+        end
+    end
+end
+
+local function snapshotOriginalFrames(cellIdx)
+    if not canvas then return end
+    local cell = cellMap[cellIdx]
+    local frames = {}
+    for ei = cell.elementStart, cell.elementEnd do
+        local f = canvas[ei].frame
+        frames[ei] = { x = f.x, y = f.y, w = f.w, h = f.h }
+    end
+    return frames
+end
+
+local function moveCellElements(cellIdx, dx, dy, frames)
+    if not canvas then return end
+    local cell = cellMap[cellIdx]
+    for ei = cell.elementStart, cell.elementEnd do
+        local of = frames[ei]
+        canvas[ei].frame = { x = of.x + dx, y = of.y + dy, w = of.w, h = of.h }
+    end
+end
+
+local function restoreCellElements(cellIdx, frames)
+    if not canvas then return end
+    local cell = cellMap[cellIdx]
+    for ei = cell.elementStart, cell.elementEnd do
+        local of = frames[ei]
+        canvas[ei].frame = { x = of.x, y = of.y, w = of.w, h = of.h }
+    end
+end
+
+local dragSourceFrames = nil
+local dragTargetFrames = nil
+
+local function resetDragState()
+    if canvas and dragSourceIndex and dragSourceFrames then
+        restoreCellElements(dragSourceIndex, dragSourceFrames)
+    end
+    if canvas and dragTargetIndex and dragTargetFrames then
+        restoreCellElements(dragTargetIndex, dragTargetFrames)
+    end
+    dragSourceIndex = nil
+    dragActive = false
+    dragStartPos = nil
+    dragTargetIndex = nil
+    dragSourceFrames = nil
+    dragTargetFrames = nil
+end
+
+local function stopMouseEventTap()
+    if mouseEventTap then
+        mouseEventTap:stop()
+        mouseEventTap = nil
+    end
+end
+
+local function startMouseEventTap()
+    stopMouseEventTap()
+    mouseEventTap = hs.eventtap.new({
+        hs.eventtap.event.types.leftMouseDown,
+        hs.eventtap.event.types.leftMouseDragged,
+        hs.eventtap.event.types.leftMouseUp,
+    }, function(event)
+        if not canvas then return false end
+
+        local eventType = event:getType()
+        local pos = event:location()
+        local frame = canvas:frame()
+        local x = pos.x - frame.x
+        local y = pos.y - frame.y
+
+        if eventType == hs.eventtap.event.types.leftMouseDown then
+            resetDragState()
+            dragSourceIndex = findCellAtPoint(x, y)
+            dragStartPos = { x = pos.x, y = pos.y }
+            if dragSourceIndex then
+                dragSourceFrames = snapshotOriginalFrames(dragSourceIndex)
+            end
+            return dragSourceIndex ~= nil
+
+        elseif eventType == hs.eventtap.event.types.leftMouseDragged then
+            if not dragSourceIndex or not dragStartPos or not dragSourceFrames then return false end
+
+            local dx = pos.x - dragStartPos.x
+            local dy = pos.y - dragStartPos.y
+
+            if not dragActive then
+                if math.sqrt(dx * dx + dy * dy) >= M.config.dragThreshold then
+                    dragActive = true
+                end
+            end
+
+            if dragActive then
+                moveCellElements(dragSourceIndex, dx, dy, dragSourceFrames)
+
+                local newTarget = findCellAtPoint(x, y)
+                if newTarget == dragSourceIndex then newTarget = nil end
+
+                if newTarget ~= dragTargetIndex then
+                    if dragTargetIndex and dragTargetFrames then
+                        restoreCellElements(dragTargetIndex, dragTargetFrames)
+                        dragTargetFrames = nil
+                    end
+
+                    if newTarget then
+                        dragTargetFrames = snapshotOriginalFrames(newTarget)
+                        local src = cellMap[dragSourceIndex]
+                        local tgt = cellMap[newTarget]
+                        local tdx = src.x - tgt.x
+                        local tdy = src.y - tgt.y
+                        moveCellElements(newTarget, tdx, tdy, dragTargetFrames)
+                    end
+
+                    dragTargetIndex = newTarget
+                end
+            end
+
+            return true
+
+        elseif eventType == hs.eventtap.event.types.leftMouseUp then
+            if dragActive and dragSourceIndex and dragTargetIndex then
+                local srcIdx, tgtIdx = dragSourceIndex, dragTargetIndex
+                resetDragState()
+                swapWorkspaces(srcIdx, tgtIdx, function()
+                    M.refresh()
+                end)
+                return true
+            elseif dragSourceIndex and not dragActive then
+                local cellIdx = findCellAtPoint(x, y)
+                if cellIdx then
+                    updateSelection(selectedIndex, cellIdx)
+                    confirmSelection()
+                else
+                    M.hide()
+                end
+            else
+                if not dragActive then
+                    M.hide()
+                end
+                resetDragState()
+            end
+
+            return true
+        end
+
+        return false
+    end)
+    mouseEventTap:start()
+end
+
 local function buildElements(workspaces)
     local screen = hs.screen.mainScreen()
     local screenFrame = screen:frame()
@@ -214,6 +429,7 @@ local function buildElements(workspaces)
             end
 
             local isSelected = (idx == focusedCellIndex and ws.isFocused)
+            local elementStart = #elements + 1
 
             table.insert(elements, {
                 type = "rectangle",
@@ -279,6 +495,8 @@ local function buildElements(workspaces)
                 end
             end
 
+            local elementEnd = #elements
+
             table.insert(cellMap, {
                 x = cx,
                 y = cy,
@@ -287,6 +505,9 @@ local function buildElements(workspaces)
                 workspace = ws.name,
                 isFocused = ws.isFocused,
                 elementIndex = cellElementIndex,
+                elementStart = elementStart,
+                elementEnd = elementEnd,
+                windowIds = ws.windowIds,
             })
 
             idx = idx + 1
@@ -324,8 +545,14 @@ local function unbindNavKeys()
     navHotkeys = {}
 end
 
-function M.show()
-    if canvas then return end
+local function renderCanvas()
+    unbindNavKeys()
+    if canvas then
+        canvas:delete()
+        canvas = nil
+    end
+    cellMap = {}
+    selectedIndex = 1
 
     local workspaces = gatherWorkspaces()
     if #workspaces == 0 then return end
@@ -341,32 +568,30 @@ function M.show()
     canvas:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
     canvas:clickActivating(false)
 
-    canvas:mouseCallback(function(_, msg, _, x, y)
-        if msg == "mouseUp" then
-            for i, cell in ipairs(cellMap) do
-                if x >= cell.x and x <= cell.x + cell.w
-                    and y >= cell.y and y <= cell.y + cell.h then
-                    updateSelection(selectedIndex, i)
-                    confirmSelection()
-                    return
-                end
-            end
-            M.hide()
-        end
-    end)
-
     canvas:show()
     bindNavKeys()
 end
 
+function M.show()
+    if canvas then return end
+    renderCanvas()
+    startMouseEventTap()
+end
+
 function M.hide()
     if not canvas then return end
-
+    resetDragState()
+    stopMouseEventTap()
     unbindNavKeys()
     canvas:delete()
     canvas = nil
     cellMap = {}
     selectedIndex = 1
+end
+
+function M.refresh()
+    if not canvas then return end
+    renderCanvas()
 end
 
 function M.toggle()
