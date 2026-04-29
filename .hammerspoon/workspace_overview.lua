@@ -200,13 +200,10 @@ local function findCellAtPoint(x, y)
     return nil
 end
 
-local function swapWorkspaces(idxA, idxB, callback)
+local function swapWorkspaces(idxA, idxB)
     local cellA = cellMap[idxA]
     local cellB = cellMap[idxB]
-    if not cellA or not cellB then
-        if callback then callback() end
-        return
-    end
+    if not cellA or not cellB then return end
 
     local commands = {}
     for _, wid in ipairs(cellA.windowIds) do
@@ -216,25 +213,9 @@ local function swapWorkspaces(idxA, idxB, callback)
         table.insert(commands, { "move-node-to-workspace", "--window-id", tostring(wid), cellA.workspace })
     end
 
-    if #commands == 0 then
-        if callback then callback() end
-        return
-    end
-
-    local remaining = #commands
-    local function onTaskDone()
-        remaining = remaining - 1
-        if remaining == 0 and callback then
-            callback()
-        end
-    end
     for _, cmd in ipairs(commands) do
-        local task = hs.task.new(AEROSPACE_PATH, onTaskDone, cmd)
-        if task then
-            task:start()
-        else
-            onTaskDone()
-        end
+        local task = hs.task.new(AEROSPACE_PATH, function() end, cmd)
+        if task then task:start() end
     end
 end
 
@@ -277,6 +258,32 @@ local function resetDragState()
     if canvas and dragTargetIndex and dragTargetFrames then
         restoreCellElements(dragTargetIndex, dragTargetFrames)
     end
+    dragSourceIndex = nil
+    dragActive = false
+    dragStartPos = nil
+    dragTargetIndex = nil
+    dragSourceFrames = nil
+    dragTargetFrames = nil
+end
+
+local function finalizeDragSwap(srcIdx, tgtIdx, srcFrames, tgtFrames)
+    local src = cellMap[srcIdx]
+    local tgt = cellMap[tgtIdx]
+
+    -- Snap source elements to target's original position
+    local sdx = tgt.x - src.x
+    local sdy = tgt.y - src.y
+    moveCellElements(srcIdx, sdx, sdy, srcFrames)
+
+    -- Target elements are already at source's position (from drag preview)
+    -- No need to move them
+
+    -- Swap cellMap metadata
+    src.workspace, tgt.workspace = tgt.workspace, src.workspace
+    src.windowIds, tgt.windowIds = tgt.windowIds, src.windowIds
+    src.isFocused, tgt.isFocused = tgt.isFocused, src.isFocused
+
+    -- Clear drag state without restoring positions
     dragSourceIndex = nil
     dragActive = false
     dragStartPos = nil
@@ -358,10 +365,9 @@ local function startMouseEventTap()
         elseif eventType == hs.eventtap.event.types.leftMouseUp then
             if dragActive and dragSourceIndex and dragTargetIndex then
                 local srcIdx, tgtIdx = dragSourceIndex, dragTargetIndex
-                resetDragState()
-                swapWorkspaces(srcIdx, tgtIdx, function()
-                    M.refresh()
-                end)
+                local srcFrames, tgtFrames = dragSourceFrames, dragTargetFrames
+                finalizeDragSwap(srcIdx, tgtIdx, srcFrames, tgtFrames)
+                swapWorkspaces(srcIdx, tgtIdx)
                 return true
             elseif dragSourceIndex and not dragActive then
                 local cellIdx = findCellAtPoint(x, y)
@@ -545,14 +551,8 @@ local function unbindNavKeys()
     navHotkeys = {}
 end
 
-local function renderCanvas()
-    unbindNavKeys()
-    if canvas then
-        canvas:delete()
-        canvas = nil
-    end
-    cellMap = {}
-    selectedIndex = 1
+function M.show()
+    if canvas then return end
 
     local workspaces = gatherWorkspaces()
     if #workspaces == 0 then return end
@@ -570,11 +570,6 @@ local function renderCanvas()
 
     canvas:show()
     bindNavKeys()
-end
-
-function M.show()
-    if canvas then return end
-    renderCanvas()
     startMouseEventTap()
 end
 
@@ -587,11 +582,6 @@ function M.hide()
     canvas = nil
     cellMap = {}
     selectedIndex = 1
-end
-
-function M.refresh()
-    if not canvas then return end
-    renderCanvas()
 end
 
 function M.toggle()
