@@ -3,7 +3,7 @@
 local M = {}
 
 M.config = {
-    hotkey = { mod = { "ctrl", "alt" }, key = "m" },
+    hotkey = { mod = { "ctrl", "alt" }, key = "up" },
     bgColor = { red = 0.05, green = 0.05, blue = 0.08, alpha = 0.92 },
     cellBg = { red = 0.18, green = 0.18, blue = 0.2, alpha = 1.0 },
     cellBgFocused = { red = 0.15, green = 0.22, blue = 0.35, alpha = 1.0 },
