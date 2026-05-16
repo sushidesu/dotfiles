@@ -1,6 +1,6 @@
 #!/bin/bash
 
-EXCLUDE_PATH=(".git" ".config" ".claude" ".codex" "scripts")
+EXCLUDE_PATH=(".git" ".config" ".claude" ".codex" "home" "scripts" "AGENTS.md" "CLAUDE.md")
 EXCLUDE_FILES=(".DS_Store")
 DOTPATH=$HOME/.dotfiles
 
@@ -119,3 +119,6 @@ linking_dir "$DOTPATH/.claude/skills" "$HOME/.claude/skills"
 message "\$DOTPATH/.claude/skills -> ~/.codex/skills"
 ensure_dir "$HOME/.codex"
 linking_dir "$DOTPATH/.claude/skills" "$HOME/.codex/skills"
+
+message "\$DOTPATH/home/*"
+link_anywhere $DOTPATH/home $HOME
