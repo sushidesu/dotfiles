@@ -8,6 +8,8 @@ Reduce complexity — the structural load that makes code hard to understand and
 
 Cut unnecessary processing, branches, and state.
 
+Code only the intended path. A fallback is unnecessary complexity that hides a real problem; fix the root cause instead.
+
 Tests verify behavior. Keep them independent of implementation details — explicit and simple. Update them when behavior changes.
 
 Document with names. In comments, leave the "why" — the reasoning behind a choice.
