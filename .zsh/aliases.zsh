@@ -56,6 +56,9 @@ alias grc='git rebase --continue'
 alias gra='git rebase --abort'
 alias gogogo='git push -u origin HEAD'
 
+# claude
+alias wclaude='CLAUDE_CONFIG_DIR="$HOME/.claude-work" claude'
+
 # always includes dotfiles
 alias rg='rg -.'
 alias fd='fd -H'

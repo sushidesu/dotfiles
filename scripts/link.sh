@@ -122,3 +122,7 @@ linking_dir "$DOTPATH/.claude/skills" "$HOME/.codex/skills"
 
 message "\$DOTPATH/home/*"
 link_anywhere $DOTPATH/home $HOME
+
+message "\$DOTPATH/home/CLAUDE.md -> ~/.claude-work/CLAUDE.md"
+ensure_dir "$HOME/.claude-work"
+linking "$DOTPATH/home/CLAUDE.md" "$HOME/.claude-work/CLAUDE.md"
