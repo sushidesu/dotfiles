@@ -1,0 +1,4 @@
+#!/bin/bash
+# cf - open claude --resume picker in a new tmux pane.
+
+tmux split-window -h -c "$PWD" "claude --resume"
