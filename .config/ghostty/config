@@ -74,6 +74,10 @@ cursor-style = block
 adjust-cursor-thickness = 2
 shell-integration-features = no-cursor
 
+# cmd+comma (default open_config) misfires too easily; move it behind shift
+keybind = cmd+comma=unbind
+keybind = cmd+shift+comma=open_config
+
 # Quick terminal tweaks
 keybind = global:option+q=toggle_quick_terminal
 quick-terminal-animation-duration = 0
