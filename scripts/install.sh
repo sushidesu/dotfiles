@@ -4,27 +4,23 @@ if [[ -z $DOTPATH ]]; then
   DOTPATH=~/.dotfiles
 fi
 
-# enable color
-source $DOTPATH/scripts/colors.sh
+# https instead of ssh so the first clone works before SSH keys are set up
+DOTFILES_GITHUB="https://github.com/sushidesu/dotfiles.git"
 
-DOTFILES_GITHUB="git@github.com:sushidesu/dotfiles.git"
-
-function message() {
-  echo -e "${C_LGY}------ ${1}${NC}"
-}
-
-message "CLONE REPOSITORY"
+# colors.sh is only available after the clone, so this section is uncolored
+echo "------ CLONE REPOSITORY"
 if [[ -d $DOTPATH ]]; then
-  echo -e "${C_BL}skip${NC} $DOTPATH is already exsists."
+  echo "skip $DOTPATH already exists."
 else
-  echo -e "${C_GR}clone${NC} $DOTFILES_GITHUB -> $DOTPATH"
-  git clone --recursive $DOTFILES_GITHUB $DOTPATH
+  echo "clone $DOTFILES_GITHUB -> $DOTPATH"
+  git clone --recursive "$DOTFILES_GITHUB" "$DOTPATH" || exit 1
 fi
 
+source "$DOTPATH/scripts/colors.sh"
+
 echo
-message "LINK FILES"
-$DOTPATH/scripts/link.sh
+echo -e "${C_LGY}------ LINK FILES${NC}"
+"$DOTPATH/scripts/link.sh"
 
 echo
 echo -e "done...!"
-
