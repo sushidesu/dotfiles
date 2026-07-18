@@ -32,7 +32,7 @@ function cleanup_local_branches() {
 #   some-branch
 # ↑この空白とアスタリスクを消す
 function remove_spaces() {
-  getarg | sed "s/\* //" | sed "s/^  //"
+  sed -e "s/\* //" -e "s/^  //"
 }
 
 function message_skip() {
