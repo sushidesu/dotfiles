@@ -9,10 +9,6 @@ alias vim='nvim'
 alias reload-shell='exec $SHELL -l'
 alias showpath='echo $PATH | tr ":" "\n" | nl'
 
-# 競プロ用
-alias atest='g++ main.cpp && oj t'
-alias ainit='xclip -o | xargs oj d && touch main.cpp'
-
 # vscode
 alias coder='code -r .'
 
