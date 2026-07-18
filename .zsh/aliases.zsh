@@ -19,16 +19,6 @@ alias lg='lazygit'
 alias nr='npm run'
 alias yw='yarn workspace'
 
-# test
-alias testfile='f() { 
-  FILE="$1"
-  BASENAME=$(basename "$FILE")
-  EXT="${BASENAME##*.}"
-  NAMEONLY="${BASENAME%.*}"
-  TESTFILE="${NAMEONLY}.test.${EXT}"
-  npm test -- --silent --coverage --watchAll=false --collectCoverageFrom="$FILE" "$TESTFILE"
-}; f'
-
 # git
 alias ss='git ss'
 alias cc='git c'
