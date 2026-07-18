@@ -1,3 +1,14 @@
+# Run the jest test file paired with the given source file, with coverage
+# scoped to that file.
+testfile() {
+  local file="$1"
+  local basename="${file:t}"
+  local ext="${basename##*.}"
+  local nameonly="${basename%.*}"
+  npm test -- --silent --coverage --watchAll=false \
+    --collectCoverageFrom="$file" "${nameonly}.test.${ext}"
+}
+
 _tmux_session_name_from_dir() {
   local dir="$1"
   local name="${dir:t}"
@@ -31,11 +42,7 @@ _tmux_open_session_for_dir() {
   if ! tmux has-session -t "$target" 2>/dev/null; then
     tmux new-session -d -s "$name" -c "$dir" || return 1
   fi
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$target"
-  else
-    tmux attach-session -t "$target"
-  fi
+  "$HOME/.dotfiles/bin/ta-switch" "$name"
 }
 
 ta() {
