@@ -3,8 +3,8 @@
 #
 # Tab-centric workflow: tabs are tasks, workspaces are ignored (when only
 # one workspace exists its name is not even shown). Candidates:
-#   - existing tabs, focused first then sidebar order, with pane preview
-#     (no MRU — herdr has no visit hooks to record one)
+#   - existing tabs, most-recently-focused first, with pane preview
+#     (recency comes from the hw-mru plugin's focus log, ranked in list_tabs)
 #   - zoxide frecent directories (deduped against tab cwds)
 #   - ~/dev/ subdirectories (deduped against above)
 # Selecting a directory creates a tab there (label = basename), so new
@@ -30,13 +30,18 @@ set -euo pipefail
 # and ~/.local/bin/herdr resolve regardless
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
+# the hw-mru plugin (linked by ensure_mru_plugin) logs tab focus order here;
+# path is fixed by herdr from the plugin id, so hw-pick can read it directly
+MRU_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr/plugins/hw-mru/mru"
+
 # Fields (tab-separated): type, target, preview pane, display, cwd.
 #   type T → target is a tab_id, preview pane is its focused/first pane
 #   type D → target is a directory, preview pane is "-"
 # cwd stays absolute for deduping; the display copy is ~-shortened.
 list_tabs() {
-  local ws_json
+  local ws_json mru=""
   ws_json=$(herdr workspace list)
+  [[ -f "$MRU_FILE" ]] && mru=$(<"$MRU_FILE")
   {
     printf '%s\n' "$ws_json"
     jq -r '.result.workspaces[].workspace_id' <<<"$ws_json" \
@@ -44,14 +49,19 @@ list_tabs() {
           herdr tab list --workspace "$wid"
           herdr pane list --workspace "$wid"
         done
-  } | jq -rs --arg home "$HOME" '
+  } | jq -rs --arg home "$HOME" --arg mru "$mru" '
     map(.result)
     | ([.[] | select(.type == "workspace_list").workspaces[]]) as $ws
     | ($ws | map({key: .workspace_id, value: .label}) | from_entries) as $wsl
     | ([.[] | select(.type == "pane_list").panes[]]
         | group_by(.tab_id) | map({key: .[0].tab_id, value: .}) | from_entries) as $panes
+    # a tab_id maps to the line index of its LAST focus in the log; higher =
+    # more recent. tabs never focused since the log began have no entry.
+    | ($mru | split("\n") | map(select(length > 0))
+        | to_entries | reduce .[] as $e ({}; .[$e.value] = ($e.key))) as $rank
     | [.[] | select(.type == "tab_list").tabs[]]
-    | (map(select(.focused)) + map(select(.focused | not)))[]
+    # most recent first; tabs with no focus record fall to the end by number
+    | sort_by([ -($rank[.tab_id] // -1), .number ])[]
     | ($panes[.tab_id] // []) as $pp
     | (($pp | map(select(.focused))) + $pp)[0] as $p0
     | ($p0.foreground_cwd // $p0.cwd // "") as $abs
@@ -124,6 +134,19 @@ if ! herdr workspace list >/dev/null 2>&1; then
 fi
 
 self=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")
+
+# hw-pick owns the MRU feature end to end: it links its recorder plugin on
+# first run (herdr persists the link in plugins.json), so there is no separate
+# setup step to forget. This only feeds recency ordering, so a failure must
+# never stop the picker from switching tabs.
+ensure_mru_plugin() {
+  herdr plugin list --json 2>/dev/null \
+    | jq -e 'any(.result.plugins[]?; .plugin_id == "hw-mru")' >/dev/null && return 0
+  local repo
+  repo=$(cd "$(dirname "$self")/.." && pwd -P)
+  herdr plugin link "$repo/.config/herdr/plugins/hw-mru" >/dev/null 2>&1 || true
+}
+ensure_mru_plugin
 
 # {+2} yields tab_ids (w7:t2) and directory paths; only tab_ids get closed
 close_selected="execute-silent(for t in {+2}; do case \"\$t\" in *:t*) herdr tab close \"\$t\";; esac; done)+reload('$self' list)+deselect-all"
