@@ -31,11 +31,7 @@ _tmux_open_session_for_dir() {
   if ! tmux has-session -t "$target" 2>/dev/null; then
     tmux new-session -d -s "$name" -c "$dir" || return 1
   fi
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$target"
-  else
-    tmux attach-session -t "$target"
-  fi
+  "$HOME/.dotfiles/bin/ta-switch" "$name"
 }
 
 ta() {

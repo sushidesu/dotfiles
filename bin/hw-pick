@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# hw-pick — task picker for herdr: jump to a tab or start one from a directory.
+#
+# Tab-centric workflow: tabs are tasks, workspaces are ignored (when only
+# one workspace exists its name is not even shown). Candidates:
+#   - existing tabs, focused first then sidebar order, with pane preview
+#     (no MRU — herdr has no visit hooks to record one)
+#   - zoxide frecent directories (deduped against tab cwds)
+#   - ~/dev/ subdirectories (deduped against above)
+# Selecting a directory creates a tab there (label = basename), so new
+# tasks start from the same picker that switches between them.
+#
+# Keys — nav mode (default):
+#   j / k       → move down / up
+#   l / enter   → open: jump to the tab, or create a tab from the directory
+#   h / q / esc → close the picker
+#   g / G       → first / last
+#   x / ctrl-x  → close selected tabs (directories are ignored), reload
+#   tab         → toggle multi-select
+#   /           → search mode (all keys type into the query);
+#                 esc returns to nav mode, the query keeps filtering
+#
+# Subcommands:
+#   hw-pick        open the picker (bind as a herdr popup command)
+#   hw-pick list   print candidate lines (used by fzf reload)
+
+set -euo pipefail
+
+# the popup shell may not source .zshrc; make mise-managed fzf/jq/zoxide
+# and ~/.local/bin/herdr resolve regardless
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+# Fields (tab-separated): type, target, preview pane, display, cwd.
+#   type T → target is a tab_id, preview pane is its focused/first pane
+#   type D → target is a directory, preview pane is "-"
+# cwd stays absolute for deduping; the display copy is ~-shortened.
+list_tabs() {
+  local ws_json
+  ws_json=$(herdr workspace list)
+  {
+    printf '%s\n' "$ws_json"
+    jq -r '.result.workspaces[].workspace_id' <<<"$ws_json" \
+      | while read -r wid; do
+          herdr tab list --workspace "$wid"
+          herdr pane list --workspace "$wid"
+        done
+  } | jq -rs --arg home "$HOME" '
+    map(.result)
+    | ([.[] | select(.type == "workspace_list").workspaces[]]) as $ws
+    | ($ws | map({key: .workspace_id, value: .label}) | from_entries) as $wsl
+    | ([.[] | select(.type == "pane_list").panes[]]
+        | group_by(.tab_id) | map({key: .[0].tab_id, value: .}) | from_entries) as $panes
+    | [.[] | select(.type == "tab_list").tabs[]]
+    | (map(select(.focused)) + map(select(.focused | not)))[]
+    | ($panes[.tab_id] // []) as $pp
+    | (($pp | map(select(.focused))) + $pp)[0] as $p0
+    | ($p0.foreground_cwd // $p0.cwd // "") as $abs
+    | ($abs | if startswith($home) then "~" + .[($home | length):] else . end) as $cwd
+    | ([$pp[].agent? // empty] | unique | join(" ")) as $agents
+    | ({blocked: "[31m● blocked[0m",
+        working: "[33m● working[0m",
+        done:    "[32m● done[0m",
+        idle:    "[90m● idle[0m"}[.agent_status // ""] // "") as $status
+    # tabs are the unit of work; only prefix the workspace when there is
+    # actually more than one to tell apart
+    | (if ($ws | length) > 1
+       then (($wsl[.workspace_id] // .workspace_id) + ":" + (.number | tostring)
+              + "              ")[0:14]
+       else ((.number | tostring) + "   ")[0:3]
+       end) as $col
+    | [ "T", .tab_id, ($p0.pane_id // "-"),
+        ("[34m" + $col + "[0m " + .label
+          + (if .pane_count > 1 then " [33m(\(.pane_count)p)[0m" else "" end)
+          + (if $agents != "" then " [35m\($agents)[0m" else "" end)
+          + (if $status != "" then "  " + $status else "" end)
+          + "  [90m\($cwd)[0m"),
+        $abs
+      ]
+    | @tsv'
+}
+
+candidates() {
+  local tabs seen path short
+  tabs=$(list_tabs)
+  [[ -n "$tabs" ]] && printf '%s\n' "$tabs"
+  seen=$'\n'$(cut -f5 <<<"$tabs")$'\n'
+
+  if command -v zoxide >/dev/null 2>&1; then
+    while IFS= read -r path; do
+      [[ -z "$path" ]] && continue
+      case "$seen" in *$'\n'"$path"$'\n'*) continue ;; esac
+      seen+="$path"$'\n'
+      short="${path/#$HOME/~}"
+      printf 'D\t%s\t-\t    %s\t%s\n' "$path" "$short" "$path"
+    done < <(zoxide query -l 2>/dev/null)
+  fi
+
+  local dev_dir="$HOME/dev"
+  if [[ -d "$dev_dir" ]]; then
+    for path in "$dev_dir"/*/; do
+      [[ -d "$path" ]] || continue
+      path="${path%/}"
+      case "$seen" in *$'\n'"$path"$'\n'*) continue ;; esac
+      seen+="$path"$'\n'
+      short="${path/#$HOME/~}"
+      printf 'D\t%s\t-\t    %s\t%s\n' "$path" "$short" "$path"
+    done
+  fi
+}
+
+case "${1:-}" in
+  list) candidates; exit 0 ;;
+esac
+
+for cmd in fzf jq herdr; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    printf 'hw-pick: %s not found in PATH\n' "$cmd" >&2
+    exit 1
+  fi
+done
+if ! herdr workspace list >/dev/null 2>&1; then
+  printf 'hw-pick: no herdr server running\n' >&2
+  exit 1
+fi
+
+self=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")
+
+# {+2} yields tab_ids (w7:t2) and directory paths; only tab_ids get closed
+close_selected="execute-silent(for t in {+2}; do case \"\$t\" in *:t*) herdr tab close \"\$t\";; esac; done)+reload('$self' list)+deselect-all"
+nav_keys='j,k,l,h,q,g,G,x,/'
+
+selected=$(
+  candidates | fzf \
+    --ansi \
+    --delimiter=$'\t' \
+    --with-nth=4 \
+    --no-sort \
+    --multi \
+    --reverse \
+    --prompt='hw> ' \
+    --header='j/k move · l open · h/q quit · x close · tab select · / search' \
+    --bind 'j:down,k:up,l:accept,h:abort,q:abort,g:first,G:last' \
+    --bind "x:$close_selected" \
+    --bind "ctrl-x:$close_selected" \
+    --bind "/:clear-query+change-prompt(/> )+unbind($nav_keys)" \
+    --bind "esc:transform:[[ \$FZF_PROMPT == '/> ' ]] && echo 'change-prompt(hw> )+rebind($nav_keys)' || echo abort" \
+    --preview='
+      if [ {1} = T ]; then
+        herdr pane read {3} --source visible --format ansi 2>/dev/null \
+          || echo "(no pane output)"
+      else
+        p={2}
+        printf "=== %s ===\n\n" "$p"
+        if cd "$p" 2>/dev/null; then
+          branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+          if [ -n "$branch" ]; then
+            printf "branch: %s\n\n" "$branch"
+            st=$(git status -s 2>/dev/null)
+            [ -n "$st" ] && printf "changes:\n%s\n\n" "$st"
+            printf "recent commits:\n"
+            git log --oneline -5 2>/dev/null
+          else
+            ls -A 2>/dev/null | head -30
+          fi
+        else
+          echo "(not a directory)"
+        fi
+      fi' \
+    --preview-window='right,55%,wrap'
+) || exit 0
+
+[[ -z "$selected" ]] && exit 0
+
+IFS=$'\t' read -r sel_type sel_target _pane _display _cwd <<<"${selected%%$'\n'*}"
+
+case "$sel_type" in
+  T)
+    herdr tab focus "$sel_target" >/dev/null
+    ;;
+  D)
+    [[ -d "$sel_target" ]] || { printf 'hw-pick: not a directory: %s\n' "$sel_target" >&2; exit 1; }
+    abs=$(cd "$sel_target" && pwd -P)
+    herdr tab create --cwd "$abs" --label "${abs##*/}" --focus >/dev/null
+    ;;
+  *)
+    printf 'hw-pick: unknown selection type: %s\n' "$sel_type" >&2
+    exit 1
+    ;;
+esac

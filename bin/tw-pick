@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# tw-pick — interactive tmux window picker across all sessions.
+#
+# Lists every window of every session, most recently *visited* first,
+# with a live pane preview. Visits are recorded by tmux hooks calling
+# `tw-pick log` (see tmux.conf); windows not yet in the log fall back
+# to session attach time. window_activity is not used for ordering —
+# background output keeps refreshing it, so it reflects process noise,
+# not when the user last looked at the window. It is still shown as
+# the age column to help spot dead windows.
+#
+# Keys — nav mode (default):
+#   j / k       → move down / up
+#   l / enter   → jump to the window (switching session if needed)
+#   h / q / esc → close the picker
+#   g / G       → first / last
+#   x / ctrl-x  → kill selected windows (or the cursor line), reload
+#   tab         → toggle multi-select
+#   /           → search mode (all keys type into the query);
+#                 esc returns to nav mode, the query keeps filtering
+#
+# Subcommands:
+#   tw-pick           open the picker (fzf popup or terminal)
+#   tw-pick list      print candidate lines (used by fzf reload)
+#   tw-pick log <id>  record a window visit (used by tmux hooks)
+
+set -euo pipefail
+
+mru_dir="${XDG_STATE_HOME:-$HOME/.local/state}/tw-pick"
+mru_file="$mru_dir/mru"
+
+# Append "timestamp <tab> window_id"; compact once the log grows.
+# Windows in detached sessions are ignored: their current-window can
+# only change through kills or scripted commands, not through the
+# user actually viewing them.
+log_visit() {
+  [[ -n "${1:-}" ]] || return 0
+  local attached
+  attached=$(tmux display-message -p -t "$1" '#{session_attached}' 2>/dev/null) || return 0
+  [[ "$attached" != 0 ]] || return 0
+  mkdir -p "$mru_dir"
+  printf '%s\t%s\n' "$(date +%s)" "$1" >>"$mru_file"
+  # per-PID temp file: the hooks run with `run-shell -b`, so two log
+  # invocations can compact concurrently and must not share one path
+  if (( $(wc -l <"$mru_file") > 2000 )); then
+    awk -F'\t' '{ last[$2] = $0 } END { for (k in last) print last[k] }' "$mru_file" \
+      | sort -n >"$mru_file.tmp.$$" && mv "$mru_file.tmp.$$" "$mru_file"
+  fi
+}
+
+# Fields (tab-separated): window_id, session_name, display text.
+# window_id (@N) is globally unique and survives renames/renumbering
+# while the picker is open, so it is the only target we act on.
+#
+# Three tiers: the window currently on screen first, then windows in
+# the visit log (most recently viewed first), then never-logged windows
+# by window_activity. Activity is noisy (background output refreshes
+# it) but window-granular, so the last tier doesn't clump by session;
+# the logged tier grows with use.
+current_window() {
+  local client
+  client=$(tmux list-clients -F $'#{client_activity}\t#{client_session}' 2>/dev/null \
+    | sort -rn | head -1 | cut -f2)
+  [[ -n "$client" ]] || return 0
+  tmux display-message -p -t "=$client:" '#{window_id}' 2>/dev/null
+}
+
+list_windows() {
+  local now mf cur _tier _key id activity session index name path panes
+  now=$(date +%s)
+  mf="$mru_file"
+  [[ -f "$mf" ]] || mf=/dev/null
+  cur=$(current_window)
+  # window_name and pane_current_path can be empty; substitute "-" so
+  # the field is never dropped — tab is IFS whitespace, and the read
+  # below would collapse consecutive tabs and shift every later column.
+  # (`!=` against empty rather than #{?window_name,...}: a window named
+  # "0" is falsy to tmux but is not empty.)
+  tmux list-windows -a \
+    -F $'#{window_id}\t#{window_activity}\t#{session_name}\t#{window_index}\t#{?#{!=:#{window_name},},#{window_name},-}\t#{?#{!=:#{pane_current_path},},#{pane_current_path},-}\t#{window_panes}' \
+    | awk -F'\t' -v OFS='\t' -v mf="$mf" -v cur="$cur" '
+        FILENAME == mf { mru[$2] = $1; next }
+        {
+          if ($1 == cur && cur != "") print -1, 0, $0
+          else if ($1 in mru)         print 0, mru[$1], $0
+          else                        print 1, $2, $0
+        }' "$mf" - \
+    | sort -t $'\t' -k1,1n -k2,2rn \
+    | while IFS=$'\t' read -r _tier _key id activity session index name path panes; do
+        local age age_s short pane_s
+        age=$(( now - activity ))
+        if (( age < 3600 )); then age_s="$(( age / 60 ))m"
+        elif (( age < 86400 )); then age_s="$(( age / 3600 ))h"
+        else age_s="$(( age / 86400 ))d"; fi
+        short="${path/#$HOME/~}"
+        pane_s=""
+        (( panes > 1 )) && pane_s=" (${panes}p)"
+        printf '%s\t%s\t\033[34m%-12s\033[0m %s\033[33m%s\033[0m  \033[90m%s  %s\033[0m\n' \
+          "$id" "$session" "$session:$index" "$name" "$pane_s" "$age_s" "$short"
+      done
+}
+
+case "${1:-}" in
+  list) list_windows; exit 0 ;;
+  log)  log_visit "${2:-}"; exit 0 ;;
+esac
+
+if ! command -v fzf >/dev/null 2>&1; then
+  printf 'tw-pick: fzf not found in PATH\n' >&2
+  exit 1
+fi
+if ! tmux list-sessions >/dev/null 2>&1; then
+  printf 'tw-pick: no tmux server running\n' >&2
+  exit 1
+fi
+
+self=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")
+
+kill_selected="execute-silent(for t in {+1}; do tmux kill-window -t \"\$t\"; done)+reload('$self' list)+deselect-all"
+nav_keys='j,k,l,h,q,g,G,x,/'
+
+selected=$(
+  list_windows | fzf \
+    --ansi \
+    --delimiter=$'\t' \
+    --with-nth=3 \
+    --no-sort \
+    --multi \
+    --reverse \
+    --prompt='tw> ' \
+    --header='j/k move · l open · h/q quit · x kill · tab select · / search' \
+    --bind 'j:down,k:up,l:accept,h:abort,q:abort,g:first,G:last' \
+    --bind "x:$kill_selected" \
+    --bind "ctrl-x:$kill_selected" \
+    --bind "/:clear-query+change-prompt(/> )+unbind($nav_keys)" \
+    --bind "esc:transform:[[ \$FZF_PROMPT == '/> ' ]] && echo 'change-prompt(tw> )+rebind($nav_keys)' || echo abort" \
+    --preview='
+      tmux display-message -p -t {1} "=== #S:#I #W — #{pane_current_path} ===" 2>/dev/null;
+      echo;
+      tmux capture-pane -pe -t {1} 2>/dev/null || echo "(no pane output)"' \
+    --preview-window='right,55%,wrap'
+) || exit 0
+
+[[ -z "$selected" ]] && exit 0
+
+IFS=$'\t' read -r sel_id sel_session _sel_display <<<"${selected%%$'\n'*}"
+
+tmux select-window -t "$sel_id"
+"${0%/*}/ta-switch" "$sel_session"

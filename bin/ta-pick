@@ -117,18 +117,9 @@ name_from_path() {
   printf '%s\n' "$n"
 }
 
-attach_or_switch() {
-  local target="=$1"
-  if [[ -n "${TMUX:-}" ]]; then
-    tmux switch-client -t "$target"
-  else
-    tmux attach-session -t "$target"
-  fi
-}
-
 case "$sel_type" in
   S)
-    attach_or_switch "$sel_name"
+    "${0%/*}/ta-switch" "$sel_name"
     ;;
   D)
     [[ -d "$sel_path" ]] || { printf 'ta-pick: not a directory: %s\n' "$sel_path" >&2; exit 1; }
@@ -137,7 +128,7 @@ case "$sel_type" in
     if ! tmux has-session -t "=$new_name" 2>/dev/null; then
       tmux new-session -d -s "$new_name" -c "$abs"
     fi
-    attach_or_switch "$new_name"
+    "${0%/*}/ta-switch" "$new_name"
     ;;
   *)
     printf 'ta-pick: unknown selection type: %s\n' "$sel_type" >&2
