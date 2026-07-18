@@ -1,6 +1,8 @@
 #!/bin/bash
 
-EXCLUDE_PATH=(".git" ".config" ".claude" ".codex" "home" "scripts" "AGENTS.md" "CLAUDE.md")
+# .config/herdr is excluded from the .config sweep: ~/.config/herdr holds
+# runtime state (sockets, logs), so only config.toml gets linked below
+EXCLUDE_PATH=(".git" ".config" ".config/herdr" ".claude" ".codex" "home" "scripts" "AGENTS.md" "CLAUDE.md")
 EXCLUDE_FILES=(".DS_Store")
 DOTPATH=$HOME/.dotfiles
 
@@ -103,6 +105,12 @@ link_anywhere $DOTPATH $HOME
 message "\$DOTPATH/.config/*"
 ensure_dir "$HOME/.config"
 link_anywhere $DOTPATH/.config $HOME/.config
+
+# ~/.config/herdr also holds runtime state (sockets, logs),
+# so link only the config file, not the directory
+message "\$DOTPATH/.config/herdr/config.toml"
+ensure_dir "$HOME/.config/herdr"
+linking "$DOTPATH/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
 message "\$DOTPATH/.claude/commands/*"
 ensure_dir "$HOME/.claude"

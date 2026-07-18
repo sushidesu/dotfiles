@@ -1,0 +1,64 @@
+# Migrated from tmux (.config/tmux/tmux.conf)
+# ~/.config/herdr holds runtime state (sockets, logs), so link.sh links
+# only this file instead of the directory.
+
+onboarding = false
+
+[theme]
+# status bar used catppuccin mocha colors
+name = "catppuccin"
+
+[keys]
+prefix = "ctrl+q"
+
+# splits follow tmux: s = side by side, v = stacked
+split_vertical = "prefix+s"
+split_horizontal = "prefix+v"
+# split_vertical takes prefix+s, so move settings off of it
+settings = "prefix+comma"
+
+# tmux: H/J/K/L
+swap_pane_left = "prefix+shift+h"
+swap_pane_down = "prefix+shift+j"
+swap_pane_up = "prefix+shift+k"
+swap_pane_right = "prefix+shift+l"
+
+# tmux: Tab = switch-client -l (back-and-forth across workspaces)
+last_pane = "prefix+tab"
+cycle_pane_next = ""
+
+# tmux: t = tw-pick window picker → hw-pick popup below
+# (workspace_picker stays on the default prefix+w)
+
+# fuzzy tab picker across all workspaces (bin/hw-pick)
+[[keys.command]]
+key = "prefix+t"
+type = "popup"
+command = "~/.dotfiles/bin/hw-pick"
+width = "90%"
+height = "80%"
+
+[advanced]
+# tmux: history-limit 240000 lines (~100 bytes/line)
+scrollback_limit_bytes = 24000000
+
+[ui]
+show_agent_labels_on_pane_borders = true
+# collapse (prefix+b) removes the sidebar entirely instead of leaving a rail
+sidebar_collapsed_mode = "hidden"
+# tab-centric workflow: agents as one attention queue, not grouped by workspace
+agent_panel_sort = "priority"
+
+[ui.toast]
+delivery = "system"
+
+# agent rows without the workspace column (tabs are the task unit)
+[ui.sidebar.agents]
+rows = [["state_icon", "tab"], ["agent"]]
+
+# requires the patched build (scripts/herdr-patches): hide the spaces
+# section entirely — workspace switching is unused, only the agent queue
+# matters. The stock binary ignores the unknown key, so this is safe to
+# keep either way.
+[ui.sidebar.spaces]
+hidden = true
