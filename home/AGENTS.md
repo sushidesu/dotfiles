@@ -13,3 +13,7 @@ Code only the intended path. A fallback is unnecessary complexity that hides a r
 Tests verify behavior. Keep them independent of implementation details — explicit and simple. Update them when behavior changes.
 
 Document with names. In comments, leave the "why" — the reasoning behind a choice.
+
+This session runs under the work profile: `wclaude` = `CLAUDE_CONFIG_DIR=~/.claude-work claude`.
+
+Consult the fable-advisor agent (when available) before committing to a non-trivial design, when weighing alternatives, and after two failed debugging hypotheses. Prefer consulting too often over too rarely — judgment quality outweighs token cost.

@@ -21,8 +21,4 @@ if ! tmux has-session -t "=$name" 2>/dev/null; then
   tmux new-session -d -s "$name" -c "$abs"
 fi
 
-if [[ -n "${TMUX:-}" ]]; then
-  tmux switch-client -t "=$name"
-else
-  tmux attach-session -t "=$name"
-fi
+"${0%/*}/ta-switch" "$name"

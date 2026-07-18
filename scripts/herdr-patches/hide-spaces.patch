@@ -1,0 +1,82 @@
+diff --git a/src/app/mod.rs b/src/app/mod.rs
+index d634dbb..96f5f99 100644
+--- a/src/app/mod.rs
++++ b/src/app/mod.rs
+@@ -453,6 +453,7 @@ impl App {
+         };
+ 
+         let agent_panel_sort = agent_panel_sort_from_config(config.ui.agent_panel_sort);
++        crate::ui::set_hide_spaces(config.ui.sidebar.spaces.hidden);
+ 
+         // Validate sidebar bounds before they reach any `u16::clamp(min, max)`
+         // call: `clamp` panics when `min > max`. On bad config, fall back to
+@@ -1420,6 +1421,7 @@ impl App {
+                     agent_panel_sort_from_config(config.ui.agent_panel_sort);
+                 self.state.sidebar_agents = config.ui.sidebar.agents.clone();
+                 self.state.sidebar_spaces = config.ui.sidebar.spaces.clone();
++                crate::ui::set_hide_spaces(self.state.sidebar_spaces.hidden);
+                 self.state.agent_panel_scroll = 0;
+                 self.state.accent = crate::config::parse_color(&config.ui.accent);
+                 if !self.state.local_sound_playback && self.state.sound != config.ui.sound {
+diff --git a/src/config/sidebar.rs b/src/config/sidebar.rs
+index f720113..2f568a3 100644
+--- a/src/config/sidebar.rs
++++ b/src/config/sidebar.rs
+@@ -410,6 +410,9 @@ pub struct SpacesSidebarConfig {
+     #[serde(deserialize_with = "deserialize_sidebar_rows")]
+     pub rows: SpaceSidebarRows,
+     pub row_gap: u16,
++    /// Hide the spaces section entirely and give the agents panel the
++    /// full sidebar height.
++    pub hidden: bool,
+ }
+ 
+ impl Default for SpacesSidebarConfig {
+@@ -420,6 +423,7 @@ impl Default for SpacesSidebarConfig {
+                 vec![SpaceSidebarToken::Branch, SpaceSidebarToken::GitStatus],
+             ],
+             row_gap: DEFAULT_SIDEBAR_ROW_GAP,
++            hidden: false,
+         }
+     }
+ }
+diff --git a/src/ui.rs b/src/ui.rs
+index b7dc3fb..fa0d204 100644
+--- a/src/ui.rs
++++ b/src/ui.rs
+@@ -78,7 +78,8 @@ pub(crate) use self::{
+         agent_panel_scroll_for_target, agent_panel_scroll_metrics, agent_panel_scrollbar_rect,
+         agent_panel_toggle_rect, collapsed_sidebar_sections, collapsed_sidebar_toggle_rect,
+         compute_workspace_card_areas, expanded_sidebar_sections, expanded_sidebar_toggle_rect,
+-        normalized_workspace_scroll, sidebar_section_divider_rect, workspace_drop_indicator_row,
++        normalized_workspace_scroll, set_hide_spaces, sidebar_section_divider_rect,
++        workspace_drop_indicator_row,
+         workspace_list_entries, workspace_list_entries_expanded, workspace_list_rect,
+         workspace_list_scroll_metrics, workspace_list_scrollbar_rect, workspace_parent_group_state,
+         WorkspaceListEntry,
+diff --git a/src/ui/sidebar.rs b/src/ui/sidebar.rs
+index f89b6e6..7a234c5 100644
+--- a/src/ui/sidebar.rs
++++ b/src/ui/sidebar.rs
+@@ -38,7 +38,21 @@ pub(crate) struct AgentPanelEntry {
+     pub tokens: std::collections::HashMap<String, String>,
+ }
+ 
++// ui.sidebar.spaces.hidden: every layout helper (rendering and mouse
++// hit-testing alike) funnels through sidebar_section_heights, so a single
++// process-wide flag set from config keeps the patch to one choke point
++// instead of threading the option through a dozen call sites.
++static HIDE_SPACES: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
++
++pub(crate) fn set_hide_spaces(hidden: bool) {
++    HIDE_SPACES.store(hidden, std::sync::atomic::Ordering::Relaxed);
++}
++
+ fn sidebar_section_heights(total_h: u16, split_ratio: f32) -> (u16, u16) {
++    if HIDE_SPACES.load(std::sync::atomic::Ordering::Relaxed) {
++        return (0, total_h);
++    }
++
+     if total_h == 0 {
+         return (0, 0);
+     }

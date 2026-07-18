@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# herdr-rebuild — build herdr from source with local patches and install it.
+#
+# herdr update installs the official binary, which loses the patches in
+# ~/.dotfiles/scripts/herdr-patches/; run this afterwards to restore them.
+#
+# Requirements: rust (stable), brew zig@0.15 (the formula carries the
+# libSystem fix for macOS 26 that upstream zig 0.15.2 lacks).
+#
+# Usage: herdr-rebuild [ref]   # git ref to build, default: latest tag
+
+set -euo pipefail
+
+ref="${1:-}"
+patches_dir="$HOME/.dotfiles/scripts/herdr-patches"
+build_dir="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-build"
+zig_bin="$(brew --prefix zig@0.15)/bin"
+[[ -x "$zig_bin/zig" ]] || { echo "herdr-rebuild: brew install zig@0.15 first" >&2; exit 1; }
+# a missing patches dir must fail loudly — silently building stock herdr
+# is the one outcome this script exists to prevent
+[[ -d "$patches_dir" ]] || { echo "herdr-rebuild: $patches_dir not found" >&2; exit 1; }
+
+if [[ -d "$build_dir/.git" ]]; then
+  git -C "$build_dir" fetch --tags origin
+else
+  git clone https://github.com/ogulcancelik/herdr "$build_dir"
+fi
+
+cd "$build_dir"
+if [[ -z "$ref" ]]; then
+  ref=$(git tag --sort=-v:refname | sed -n 1p)
+fi
+[[ -n "$ref" ]] || { echo "herdr-rebuild: no release tag found" >&2; exit 1; }
+git checkout --force "$ref"
+git clean -fd
+
+for p in "$patches_dir"/*.patch; do
+  [[ -e "$p" ]] || continue
+  echo "applying ${p##*/}"
+  # --3way so patches keep applying across small upstream drift;
+  # a real conflict stops the build here instead of shipping unpatched
+  git apply --3way "$p"
+done
+
+PATH="$zig_bin:$HOME/.cargo/bin:$PATH" RUSTUP_TOOLCHAIN=stable \
+  cargo build --release
+
+install -d "$HOME/.local/bin"
+backup="$HOME/.local/bin/herdr-stock"
+[[ -f "$HOME/.local/bin/herdr" && ! -f "$backup" ]] \
+  && cp "$HOME/.local/bin/herdr" "$backup"
+install -m 755 target/release/herdr "$HOME/.local/bin/herdr"
+
+echo "installed patched herdr ($ref) -> ~/.local/bin/herdr (stock backup: $backup)"
+echo "restart: herdr server stop && herdr"

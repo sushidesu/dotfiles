@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# ta-switch — switch/attach to a tmux session by exact name.
+#
+# Shared tail of every session-switching path (ta-new, ta-pick,
+# tw-pick, `ta <dir>`): after switching, close the prefix+T
+# scratch-shell popup if we are inside one (TA_POPUP, see tmux.conf) —
+# there is nothing left to do in it.
+#
+# Usage: ta-switch <session-name>
+
+set -euo pipefail
+
+name="${1:?usage: ta-switch <session-name>}"
+
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t "=$name"
+else
+  tmux attach-session -t "=$name"
+fi
+
+if [[ -n "${TA_POPUP:-}" ]]; then
+  tmux display-popup -C
+fi
