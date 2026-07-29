@@ -74,9 +74,13 @@ cursor-style = block
 adjust-cursor-thickness = 2
 shell-integration-features = no-cursor
 
-# cmd+comma (default open_config) misfires too easily; move it behind shift
-keybind = cmd+comma=unbind
-keybind = cmd+shift+comma=open_config
+# cmd+, (default open_config) misfires too easily; move it out of reach.
+# The trigger must be spelled with a literal "," — ghostty treats the name
+# "comma" as a separate trigger, so cmd+comma=unbind silently leaves the
+# default binding in place (verify with `ghostty +list-keybinds`).
+# cmd+shift+, stays reload_config's default, so open_config goes to cmd+alt+,
+keybind = cmd+,=unbind
+keybind = cmd+alt+,=open_config
 
 # Quick terminal tweaks
 keybind = global:option+q=toggle_quick_terminal
