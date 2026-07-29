@@ -1,0 +1,4 @@
+[[mgr.prepend_keymap]]
+on = "q"
+run = ["enter", "quit"]
+desc = "Quit and cd into the hovered directory"

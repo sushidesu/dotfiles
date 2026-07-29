@@ -73,6 +73,16 @@ else
   add-zsh-hook precmd _register_tmux_dir_completions
 fi
 
+yy() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+
+  command yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp"
+
+  [[ "$cwd" != "$PWD" && -d "$cwd" ]] && builtin cd -- "$cwd"
+  command rm -f -- "$tmp"
+}
+
 # Sync tmux server's global PATH with the current shell's PATH.
 # Useful after installing new tools via mise — the tmux server's env is
 # frozen at startup and won't pick up new install dirs until reloaded.
