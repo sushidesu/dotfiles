@@ -114,6 +114,10 @@ if ! tmux list-sessions >/dev/null 2>&1; then
   exit 1
 fi
 
+# opening the picker is csm's observation moment: record where every
+# claude session lives so closed windows stay findable by name
+[[ -x "$HOME/.local/bin/csm" ]] && "$HOME/.local/bin/csm" observe >/dev/null 2>&1 &
+
 self=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")
 
 kill_selected="execute-silent(for t in {+1}; do tmux kill-window -t \"\$t\"; done)+reload('$self' list)+deselect-all"

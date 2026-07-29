@@ -133,6 +133,10 @@ if ! herdr workspace list >/dev/null 2>&1; then
   exit 1
 fi
 
+# opening the picker is csm's observation moment: record where every
+# claude session lives so closed windows stay findable by name
+[[ -x "$HOME/.local/bin/csm" ]] && "$HOME/.local/bin/csm" observe >/dev/null 2>&1 &
+
 self=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(basename "${BASH_SOURCE[0]}")
 
 # hw-pick owns the MRU feature end to end: it links its recorder plugin on
