@@ -38,6 +38,15 @@ command = "~/.dotfiles/bin/hw-pick"
 width = "90%"
 height = "80%"
 
+# claude session manager: browse/resume/close claude sessions across
+# profiles (~/box/restore_sessions)
+[[keys.command]]
+key = "prefix+e"
+type = "popup"
+command = "~/.local/bin/csm"
+width = "90%"
+height = "80%"
+
 [advanced]
 # tmux: history-limit 240000 lines (~100 bytes/line)
 scrollback_limit_bytes = 24000000
