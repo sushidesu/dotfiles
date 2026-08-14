@@ -16,6 +16,9 @@
 #   h / q / esc → close the picker
 #   g / G       → first / last
 #   x / ctrl-x  → close selected tabs (directories are ignored), reload
+#   ctrl-n      → start a project that does not exist yet: mkdir ~/dev/<query>
+#                 and open a tab there (modifier-keyed so it also works while
+#                 typing the name in search mode)
 #   tab         → toggle multi-select
 #   /           → search mode (all keys type into the query);
 #                 esc returns to nav mode, the query keeps filtering
@@ -23,6 +26,7 @@
 # Subcommands:
 #   hw-pick        open the picker (bind as a herdr popup command)
 #   hw-pick list   print candidate lines (used by fzf reload)
+#   hw-pick new N  create ~/dev/N and open a tab there (used by the ctrl-n bind)
 
 set -euo pipefail
 
@@ -118,8 +122,22 @@ candidates() {
   fi
 }
 
+# Every other way into a task starts from a directory that already exists, so
+# this is the one gap: naming something new. (tmux reached it through a
+# scratch-shell popup running ta-new; here the picker already has the name
+# typed, and the tab it opens is the workspace.)
+new_project() {
+  local name="$1" dir
+  [[ -n "$name" ]] || { printf 'hw-pick: no project name given\n' >&2; exit 1; }
+  dir="$HOME/dev/$name"
+  mkdir -p "$dir"
+  dir=$(cd "$dir" && pwd -P)
+  herdr tab create --cwd "$dir" --label "${dir##*/}" --focus >/dev/null
+}
+
 case "${1:-}" in
   list) candidates; exit 0 ;;
+  new)  new_project "${2:-}"; exit 0 ;;
 esac
 
 for cmd in fzf jq herdr; do
@@ -165,10 +183,11 @@ selected=$(
     --multi \
     --reverse \
     --prompt='hw> ' \
-    --header='j/k move · l open · h/q quit · x close · tab select · / search' \
+    --header='j/k move · l open · h/q quit · x close · ctrl-n new · tab select · / search' \
     --bind 'j:down,k:up,l:accept,h:abort,q:abort,g:first,G:last' \
     --bind "x:$close_selected" \
     --bind "ctrl-x:$close_selected" \
+    --bind "ctrl-n:become('$self' new {q})" \
     --bind "/:clear-query+change-prompt(/> )+unbind($nav_keys)" \
     --bind "esc:transform:[[ \$FZF_PROMPT == '/> ' ]] && echo 'change-prompt(hw> )+rebind($nav_keys)' || echo abort" \
     --preview='

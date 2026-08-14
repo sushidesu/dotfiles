@@ -47,6 +47,47 @@ command = "~/.local/bin/csm"
 width = "90%"
 height = "80%"
 
+# tmux: C-h/C-j/C-k/C-l = resize-pane by 5 cells. herdr resizes by a split
+# ratio delta instead, and its default step (0.05) is the closest equivalent,
+# so no --amount. Without HERDR_PANE_ID in the environment — which is the case
+# for a keybinding — `--current` resolves to the focused pane.
+[[keys.command]]
+key = "prefix+ctrl+h"
+type = "shell"
+command = "~/.local/bin/herdr pane resize --direction left --current"
+
+[[keys.command]]
+key = "prefix+ctrl+j"
+type = "shell"
+command = "~/.local/bin/herdr pane resize --direction down --current"
+
+[[keys.command]]
+key = "prefix+ctrl+k"
+type = "shell"
+command = "~/.local/bin/herdr pane resize --direction up --current"
+
+[[keys.command]]
+key = "prefix+ctrl+l"
+type = "shell"
+command = "~/.local/bin/herdr pane resize --direction right --current"
+
+# tmux: C-n = split-window -h -p 32, where 32% went to the *new* pane. herdr's
+# --ratio is the share kept by the pane being split, hence 0.68. cwd is
+# inherited, so unlike tmux there is nothing to pass through.
+[[keys.command]]
+key = "prefix+ctrl+n"
+type = "shell"
+command = "~/.local/bin/herdr pane split --current --direction right --ratio 0.68 --focus"
+
+# tmux had four select-layout presets; only their ratios survive the move to
+# herdr (bin/hw-layout explains why), so they collapse into one balance. C-t
+# was tmux's direction-agnostic "even everything out" key, which is what this
+# is.
+[[keys.command]]
+key = "prefix+ctrl+t"
+type = "shell"
+command = "~/.dotfiles/bin/hw-layout balance"
+
 [advanced]
 # tmux: history-limit 240000 lines (~100 bytes/line)
 scrollback_limit_bytes = 24000000

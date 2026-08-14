@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# hw-layout — even out the split ratios of the focused herdr tab.
+#
+# tmux had select-layout presets (even-horizontal, even-vertical, tiled,
+# main-vertical). herdr cannot reproduce them: rearranging a tab's split tree
+# needs layout.apply, which respawns every pane — it would kill the agents
+# running in them. What is reachable non-destructively is the ratio half of
+# those presets, and that is where the value was anyway: a tab skewed by
+# repeated resizes comes back to an even grid, structure and processes
+# untouched. So the four presets collapse into one balance.
+#
+# Usage: hw-layout balance
+
+set -euo pipefail
+
+# herdr launches keybinding commands with a minimal PATH; make mise-managed jq
+# and ~/.local/bin/herdr resolve the same way hw-pick does
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+
+case "${1:-}" in
+  balance) ;;
+  *) printf 'usage: hw-layout balance\n' >&2; exit 1 ;;
+esac
+
+for cmd in herdr jq nc; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    printf 'hw-layout: %s not found in PATH\n' "$cmd" >&2
+    exit 1
+  fi
+done
+
+# layout.export and layout.set_split_ratio have no CLI surface (herdr 0.7.4),
+# so speak the socket protocol directly. One request per connection: nc stops
+# reading once the first response arrives.
+SOCK=$(herdr status | awk '/socket:/ {print $2}')
+[[ -n "$SOCK" ]] || { printf 'hw-layout: no herdr server running\n' >&2; exit 1; }
+
+api() {
+  local res err
+  res=$(printf '%s\n' "$1" | nc -U "$SOCK")
+  [[ -n "$res" ]] || { printf 'hw-layout: no response from herdr\n' >&2; return 1; }
+  err=$(jq -r '.error.message // empty' <<<"$res")
+  [[ -z "$err" ]] || { printf 'hw-layout: %s\n' "$err" >&2; return 1; }
+  printf '%s\n' "$res"
+}
+
+# With no HERDR_PANE_ID in the environment — the case when herdr runs this as a
+# keybinding — `--current` resolves to the genuinely focused pane, which is the
+# tab the user is looking at. Every socket call is anchored to it, because the
+# layout methods resolve their own default target inconsistently.
+pane=$(herdr pane current --current | jq -r '.result.pane.pane_id')
+
+req=$(jq -nc --arg p "$pane" '{id:"hw-layout:export",method:"layout.export",params:{pane_id:$p}}')
+root=$(api "$req" | jq -c '.result.layout.root')
+
+# A split's ratio is the share of panes sitting on its first side, so three
+# panes in a row land on 1/3 then 1/2 — an even third each. Setting every
+# ratio to 0.5 instead would give 50/25/25, which is a different layout.
+specs=$(jq -cn --argjson root "$root" '
+  def leaves: if .type == "pane" then 1 else (.first|leaves) + (.second|leaves) end;
+  def splits($path):
+    if .type == "split"
+    then [{path: $path, ratio: ((.first|leaves) / leaves)}]
+         + (.first  | splits($path + [false]))
+         + (.second | splits($path + [true]))
+    else [] end;
+  $root | splits([])[]')
+
+[[ -n "$specs" ]] || exit 0
+
+while IFS= read -r spec; do
+  req=$(jq -nc --arg p "$pane" --argjson s "$spec" \
+    '{id:"hw-layout:set",method:"layout.set_split_ratio",
+      params:{pane_id:$p, path:$s.path, ratio:$s.ratio}}')
+  api "$req" >/dev/null
+done <<<"$specs"
