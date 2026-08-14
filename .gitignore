@@ -5,6 +5,9 @@ settings.local.json
 
 .DS_Store
 .claude/skills/.system/
+# Codex 側のスキルは .claude/skills/ の複製で、ツールが同期して作る。
+# 原本だけを管理する
+.agents/
 
 .sushidesu
 
