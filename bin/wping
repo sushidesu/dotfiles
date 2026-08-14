@@ -1,25 +1,79 @@
 #!/bin/bash
 
-# Monitor Wi-Fi connection status and ping latency.
+# Monitor Wi-Fi connection status, ICMP latency and TCP responsiveness.
+#
+# ICMP は経路上で優先度を下げられたりレート制限されたりするため、ICMP だけを見ていると
+# 実トラフィックの状態を取り違える。そのため TCP の接続時間も併記する。
+#
+# また ICMP は1周期あたり ICMP_BURST 発を連続で撃つ。無線の省電力復帰待ちがあると
+# 「アイドル明けの1発目だけ遅く、2発目以降は速い」という形になるので、この差を
+# [WAKE] として出す。区別できないと「回線が遅い」と誤読しやすい。
+#
 # Configuration can be adjusted via environment variables:
-#   IFACE=en0            # network interface to monitor
-#   TARGET=8.8.8.8       # ping destination
-#   PING_TIMEOUT_MS=1000 # ping timeout in milliseconds
-#   SLOW_THRESHOLD_MS=300# mark ping as slow when above this value
-#   SLEEP_SEC=1          # interval between checks
-#   SHOW_SSID=1          # set to 0 to skip SSID lookup
+#   IFACE=en0                 # network interface to monitor
+#   TARGET=8.8.8.8            # ICMP destination
+#   PING_TIMEOUT_MS=1000      # ping timeout in milliseconds
+#   SLOW_THRESHOLD_MS=300     # mark ICMP as slow when above this value
+#   ICMP_BURST=4              # pings sent back-to-back each cycle
+#   WAKE_RATIO=3              # flag [WAKE] when first/rest exceeds this
+#   TCP_TARGET=...            # URL used for the TCP measurement
+#   TCP_EVERY=2               # run the TCP probe every N cycles (0 disables)
+#   TCP_SLOW_THRESHOLD_MS=500 # mark TCP as slow when above this value
+#   SLEEP_SEC=1               # interval between cycles
+#   SHOW_SSID=1               # set to 0 to skip SSID lookup
+#   WPING_LOG_DIR=~/.local/state/wping  # 出力先ディレクトリ
+#   WPING_NO_LOG=1            # ファイル出力を止める
+#   WHY_COOLDOWN_SEC=20       # 異常検出時に原因照合を走らせる最短間隔 (0で無効)
+#
+# Usage:
+#   wping            # 監視。ログファイルへ追記しつつ標準出力にも出す
+#   wping --tail     # 既存ログを追尾するだけ (表示専用ペイン向け)
+#   wping --path     # 現在のログファイルのパスを表示
 
 IFACE=${IFACE:-en0}
 TARGET=${TARGET:-8.8.8.8}
 PING_TIMEOUT_MS=${PING_TIMEOUT_MS:-1000}
 SLOW_THRESHOLD_MS=${SLOW_THRESHOLD_MS:-300}
+ICMP_BURST=${ICMP_BURST:-4}
+WAKE_RATIO=${WAKE_RATIO:-3}
+TCP_TARGET=${TCP_TARGET:-https://www.gstatic.com/generate_204}
+TCP_EVERY=${TCP_EVERY:-2}
+TCP_SLOW_THRESHOLD_MS=${TCP_SLOW_THRESHOLD_MS:-500}
 SLEEP_SEC=${SLEEP_SEC:-1}
 SHOW_SSID=${SHOW_SSID:-1}
+WPING_LOG_DIR=${WPING_LOG_DIR:-$HOME/.local/state/wping}
+WHY_COOLDOWN_SEC=${WHY_COOLDOWN_SEC:-20}
+
+# ログは日付で分ける。長時間回すので1ファイルに溜め続けない
+log_file() { echo "${WPING_LOG_DIR}/wping-$(date +%Y%m%d).log"; }
+
+case ${1:-} in
+  --path) log_file; exit 0 ;;
+  --tail)
+    mkdir -p "$WPING_LOG_DIR"
+    f=$(log_file); : >>"$f"
+    exec tail -n 50 -F "$f"
+    ;;
+esac
+
+mkdir -p "$WPING_LOG_DIR"
+
+# 標準出力とファイルの両方へ。ファイルが正、標準出力は見る用
+emit() {
+  local line=$1
+  echo "$line"
+  [[ ${WPING_NO_LOG:-0} -eq 1 ]] || echo "$line" >>"$(log_file)"
+}
 
 # Cache availability of helper utilities so we don't probe every loop.
 have_networksetup=0
 if command -v networksetup >/dev/null 2>&1; then
   have_networksetup=1
+fi
+
+have_curl=0
+if command -v curl >/dev/null 2>&1; then
+  have_curl=1
 fi
 
 airport_bin=""
@@ -60,32 +114,93 @@ get_ssid() {
   return 1
 }
 
-format_ping_result() {
-  local output status rtt err_line
-  output=$(ping -c 1 -W "$PING_TIMEOUT_MS" "$TARGET" 2>&1)
-  status=$?
-
-  if [[ $status -eq 0 ]]; then
-    rtt=$(awk -F'time=' 'NF>1 {split($2,a," "); print a[1]; exit}' <<<"$output")
-    if [[ -z $rtt ]]; then
-      echo "Response"
-      return 0
-    fi
-    if awk -v r="$rtt" -v t="$SLOW_THRESHOLD_MS" 'BEGIN{exit !(r > t)}'; then
-      echo "${rtt} ms [SLOW]"
-    else
-      echo "${rtt} ms"
-    fi
-    return 0
-  fi
-
-  err_line=$(printf "%s\n" "$output" | grep -m1 '^ping:' | sed 's/^ping: //')
-  [[ -z $err_line ]] && err_line="timeout"
-  echo "No response (${err_line})"
-  return 1
+# 単発 ping の RTT をミリ秒で返す。応答が無ければ空文字。
+ping_once() {
+  ping -c 1 -W "$PING_TIMEOUT_MS" "$TARGET" 2>/dev/null \
+    | awk -F'time=' 'NF>1 {split($2,a," "); print a[1]; exit}'
 }
 
+median() {
+  local n
+  n=$#
+  [[ $n -eq 0 ]] && return 1
+  printf '%s\n' "$@" | sort -n | awk -v n="$n" 'NR==int((n+1)/2){print; exit}'
+}
+
+# ICMP をまとめて撃ち、「1発目」と「2発目以降の中央値」を分けて評価する。
+# macOS では非 root で ping -i を1秒未満にできないため、ping -c 1 を連続実行して
+# バーストを作る。連続実行なら間隔は RTT のみで決まる。
+format_icmp() {
+  local rtts=() r i lost=0 first rest_med all_med flags=""
+
+  for ((i = 0; i < ICMP_BURST; i++)); do
+    r=$(ping_once)
+    if [[ -n $r ]]; then
+      rtts+=("$r")
+    else
+      lost=$((lost + 1))
+    fi
+  done
+
+  if [[ ${#rtts[@]} -eq 0 ]]; then
+    echo "ICMP: no response (${lost}/${ICMP_BURST} lost)"
+    return 1
+  fi
+
+  first=${rtts[0]}
+  all_med=$(median "${rtts[@]}")
+
+  if [[ ${#rtts[@]} -ge 2 ]]; then
+    rest_med=$(median "${rtts[@]:1}")
+    # アイドル明けの1発目だけ突出しているなら省電力からの復帰待ち
+    if awk -v f="$first" -v m="$rest_med" -v k="$WAKE_RATIO" -v t="$SLOW_THRESHOLD_MS" \
+        'BEGIN{exit !(f > t && m > 0 && f / m > k)}'; then
+      flags+=" [WAKE]"
+    fi
+  else
+    rest_med="-"
+  fi
+
+  if awk -v r="$all_med" -v t="$SLOW_THRESHOLD_MS" 'BEGIN{exit !(r > t)}'; then
+    flags+=" [SLOW]"
+  fi
+  [[ $lost -gt 0 ]] && flags+=" [LOSS ${lost}/${ICMP_BURST}]"
+
+  printf "ICMP: %sms (1st %sms, rest %sms)%s" "$all_med" "$first" "$rest_med" "$flags"
+  return 0
+}
+
+# TCP の接続時間と応答開始までの時間。ICMP が冷遇されていてもこちらは実態に近い。
+format_tcp() {
+  [[ $have_curl -eq 1 ]] || { echo "TCP: n/a"; return 1; }
+
+  local out connect ttfb code flags=""
+  out=$(curl -sS -o /dev/null --max-time 5 \
+        -w '%{time_connect} %{time_starttransfer} %{http_code}' \
+        "$TCP_TARGET" 2>/dev/null)
+
+  read -r connect ttfb code <<<"$out"
+  if [[ -z $connect || $code == "000" ]]; then
+    echo "TCP: failed"
+    return 1
+  fi
+
+  connect=$(awk -v v="$connect" 'BEGIN{printf "%.1f", v * 1000}')
+  ttfb=$(awk -v v="$ttfb" 'BEGIN{printf "%.1f", v * 1000}')
+  if awk -v v="$ttfb" -v t="$TCP_SLOW_THRESHOLD_MS" 'BEGIN{exit !(v > t)}'; then
+    flags=" [SLOW]"
+  fi
+
+  printf "TCP: connect %sms / ttfb %sms%s" "$connect" "$ttfb" "$flags"
+  return 0
+}
+
+cycle=0
+last_why=0
+prev_ip=""
+prev_ssid=""
 while true; do
+  cycle=$((cycle + 1))
   timestamp=$(date +"%H:%M:%S")
   ifconfig_out=$(ifconfig "$IFACE" 2>/dev/null)
 
@@ -104,8 +219,41 @@ while true; do
     ip_addr="--"
   fi
 
-  ping_info=$(format_ping_result)
-  echo "[$timestamp] Wi-Fi: $status (IP: $ip_addr) | Ping: $ping_info"
+  # IP や SSID が変わるのは再アソシエーションが起きた印。数秒の停止と
+  # パケットロスを直接引き起こすので、流れるログの中でも見つかるよう明示する。
+  change_flag=""
+  if [[ -n $prev_ip && $ip_addr != "$prev_ip" ]]; then
+    change_flag+=" [IP CHANGED ${prev_ip} -> ${ip_addr}]"
+  fi
+  if [[ -n $prev_ssid && ${ssid_value:-} != "$prev_ssid" ]]; then
+    change_flag+=" [SSID CHANGED ${prev_ssid} -> ${ssid_value:-'--'}]"
+  fi
+  prev_ip=$ip_addr
+  prev_ssid=${ssid_value:-}
+
+  icmp_info=$(format_icmp)
+
+  tcp_info=""
+  if [[ $TCP_EVERY -gt 0 ]] && (( cycle % TCP_EVERY == 0 )); then
+    tcp_info=" | $(format_tcp)"
+  fi
+
+  line="[$timestamp] Wi-Fi: $status (IP: $ip_addr) | $icmp_info$tcp_info$change_flag"
+  emit "$line"
+
+  # 異常が出たら、その時刻周辺の Wi-Fi ドライバイベントを照合する。
+  # log show は 1 秒近くかかるので監視ループを止めないよう非同期にする。
+  # 連発すると log show だらけになるのでクールダウンを置く。
+  if [[ $WHY_COOLDOWN_SEC -gt 0 && $line =~ \[(SLOW|WAKE|LOSS|IP\ CHANGED|SSID\ CHANGED) ]]; then
+    now=$(date +%s)
+    if (( now - last_why >= WHY_COOLDOWN_SEC )); then
+      last_why=$now
+      (
+        why=$(wping-why "$((WHY_COOLDOWN_SEC + 10))" 2>/dev/null)
+        [[ -n $why && $why != no\ notable* ]] && emit "[$timestamp]   └─ $why"
+      ) &
+    fi
+  fi
 
   sleep "$SLEEP_SEC"
 done

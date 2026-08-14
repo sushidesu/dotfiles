@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Summarise macOS Wi-Fi driver events for a time window.
+#
+# wping が測っているのは「症状」だけで、原因は分からない。ローミング・スキャン・
+# ドライバ停止は airportd のログに残るので、症状が出た時刻の周辺を照らし合わせる。
+# ログを読むだけなので、観測対象に一切影響しない (能動的なパケットを出さない)。
+#
+# Usage:
+#   wping-why [seconds]        # 直近 N 秒 (既定 60)
+#   wping-why --raw [seconds]  # 該当行をそのまま出す
+#
+# 出力例:
+#   BSSID_CHANGED x2  LINK_CHANGED x2  driver-stall 0.573s  → ROAM
+
+SECONDS_BACK=60
+RAW=0
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --raw) RAW=1 ;;
+    *[!0-9]*) ;;
+    *) SECONDS_BACK=$1 ;;
+  esac
+  shift
+done
+
+# 注目するのは「リンクが張り直された」「電波が別チャンネルに出た」「ドライバが詰まった」の3系統。
+# airportd は毎秒40行以上出るので、predicate 側で絞らないと log show が遅くなる。
+PREDICATE='process == "airportd" AND (
+  eventMessage CONTAINS "BSSID_CHANGED"
+  OR eventMessage CONTAINS "LINK_CHANGED"
+  OR eventMessage CONTAINS "SCAN_CACHE_UPDATED"
+  OR eventMessage CONTAINS "exceeded threshold"
+  OR eventMessage CONTAINS "LINK_QUALITY_CHANGED"
+)'
+
+raw=$(/usr/bin/log show --last "${SECONDS_BACK}s" --predicate "$PREDICATE" --style compact 2>/dev/null \
+      | grep -v '^Timestamp')
+
+if [[ -z $raw ]]; then
+  [[ $RAW -eq 1 ]] && exit 0
+  echo "no notable Wi-Fi events in last ${SECONDS_BACK}s"
+  exit 0
+fi
+
+if [[ $RAW -eq 1 ]]; then
+  printf '%s\n' "$raw"
+  exit 0
+fi
+
+count() { grep -c "$1" <<<"$raw"; }
+
+bssid=$(count "BSSID_CHANGED")
+link=$(count "LINK_CHANGED")
+scan=$(count "SCAN_CACHE_UPDATED")
+lqm=$(count "LINK_QUALITY_CHANGED")
+
+# ドライバが処理を取りこぼした時間。秒単位で括弧の中に出る
+stall=$(grep "exceeded threshold" <<<"$raw" \
+        | grep -oE '\[[0-9]+\.[0-9]+\][[:space:]]*$' \
+        | tr -d '[] ' | sort -rn | head -1)
+
+parts=()
+[[ $bssid -gt 0 ]] && parts+=("BSSID_CHANGED x${bssid}")
+[[ $link  -gt 0 ]] && parts+=("LINK_CHANGED x${link}")
+[[ $scan  -gt 0 ]] && parts+=("SCAN x${scan}")
+[[ $lqm   -gt 0 ]] && parts+=("LINK_QUALITY x${lqm}")
+[[ -n $stall ]]    && parts+=("driver-stall ${stall}s")
+
+# 一番説明力のある原因を1つ添える
+verdict=""
+if [[ $bssid -gt 0 ]]; then
+  verdict="  → ROAM (AP が切り替わった)"
+elif [[ $scan -gt 0 ]]; then
+  verdict="  → SCAN (電波が他チャンネルへ)"
+elif [[ -n $stall ]]; then
+  verdict="  → DRIVER STALL"
+fi
+
+[[ ${#parts[@]} -eq 0 ]] && exit 0
+printf '%s%s\n' "$(IFS='  '; echo "${parts[*]}")" "$verdict"
