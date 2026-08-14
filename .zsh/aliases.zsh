@@ -58,6 +58,8 @@ alias gogogo='git push -u origin HEAD'
 
 # claude
 alias wclaude='CLAUDE_CONFIG_DIR="$HOME/.claude-work" claude'
+# personal と work 両方の履歴を合算して集計する
+alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" npx ccusage'
 
 # always includes dotfiles
 alias rg='rg -.'
