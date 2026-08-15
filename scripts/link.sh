@@ -120,10 +120,10 @@ ensure_dir "$HOME/.pi/agent"
 linking "$DOTPATH/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
 linking "$DOTPATH/.pi/agent/keybindings.json" "$HOME/.pi/agent/keybindings.json"
 
-# powerline-footer's theme.json: same hand-linked pattern as settings.json
-message "\$DOTPATH/.pi/agent/extensions/powerline-footer/theme.json"
-ensure_dir "$HOME/.pi/agent/extensions/powerline-footer"
-linking "$DOTPATH/.pi/agent/extensions/powerline-footer/theme.json" "$HOME/.pi/agent/extensions/powerline-footer/theme.json"
+# extensions/: all extension configs live in dotfiles; link the whole dir so
+# future extension files need no per-file entries here
+message "\$DOTPATH/.pi/agent/extensions -> ~/.pi/agent/extensions"
+linking_dir "$DOTPATH/.pi/agent/extensions" "$HOME/.pi/agent/extensions"
 
 message "\$DOTPATH/.claude/commands/*"
 ensure_dir "$HOME/.claude"
