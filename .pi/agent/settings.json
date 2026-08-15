@@ -1,0 +1,11 @@
+{
+  "lastChangelogVersion": "0.84.2",
+  "theme": "dark",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4-flash",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "npm:pi-anthropic-oauth",
+    "npm:@tintinweb/pi-subagents"
+  ]
+}

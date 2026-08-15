@@ -2,7 +2,7 @@
 
 # .config/herdr is excluded from the .config sweep: ~/.config/herdr holds
 # runtime state (sockets, logs), so only config.toml gets linked below
-EXCLUDE_PATH=(".git" ".config" ".config/herdr" ".claude" ".codex" "home" "scripts" "AGENTS.md" "CLAUDE.md")
+EXCLUDE_PATH=(".git" ".config" ".config/herdr" ".claude" ".codex" ".pi" "home" "scripts" "AGENTS.md" "CLAUDE.md")
 EXCLUDE_FILES=(".DS_Store")
 DOTPATH=$HOME/.dotfiles
 
@@ -111,6 +111,14 @@ link_anywhere $DOTPATH/.config $HOME/.config
 message "\$DOTPATH/.config/herdr/config.toml"
 ensure_dir "$HOME/.config/herdr"
 linking "$DOTPATH/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+
+# ~/.pi is shared with Claude Code (~/.Claude Code -> ~/.pi) and holds runtime
+# state (sessions, auth, model store), so link only the hand-maintained files:
+# settings.json (theme/provider/model/packages) and keybindings.json
+message "\$DOTPATH/.pi/agent/*"
+ensure_dir "$HOME/.pi/agent"
+linking "$DOTPATH/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
+linking "$DOTPATH/.pi/agent/keybindings.json" "$HOME/.pi/agent/keybindings.json"
 
 message "\$DOTPATH/.claude/commands/*"
 ensure_dir "$HOME/.claude"
