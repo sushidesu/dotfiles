@@ -14,7 +14,7 @@
 set -euo pipefail
 
 # herdr launches keybinding commands with a minimal PATH; make mise-managed jq
-# and ~/.local/bin/herdr resolve the same way hw-pick does
+# and ~/.local/bin/herdr resolve
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
 case "${1:-}" in

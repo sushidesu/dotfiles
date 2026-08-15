@@ -27,16 +27,18 @@ swap_pane_right = "prefix+shift+l"
 last_pane = "prefix+tab"
 cycle_pane_next = ""
 
-# tmux: t = tw-pick window picker → hw-pick popup below
+# tmux: t = tw-pick window picker → tabpick popup below
 # (workspace_picker stays on the default prefix+w)
 
-# fuzzy tab picker across all workspaces (bin/hw-pick)
+# tabpick — MRU-ordered tab picker across all workspaces. It lives in its own
+# repo (~/dev/herdr-tabpick, registered with `herdr plugin link`) because it is
+# published as a herdr plugin, so the popup's size and placement come from its
+# manifest and only the key belongs here. herdr is spelled out: keybinding
+# commands run with a minimal PATH.
 [[keys.command]]
 key = "prefix+t"
-type = "popup"
-command = "~/.dotfiles/bin/hw-pick"
-width = "90%"
-height = "80%"
+type = "shell"
+command = "~/.local/bin/herdr plugin pane open --plugin sushidesu.tabpick --entrypoint open"
 
 # claude session manager: browse/resume/close claude sessions across
 # profiles (~/box/restore_sessions)
