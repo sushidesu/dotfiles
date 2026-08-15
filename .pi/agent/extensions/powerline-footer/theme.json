@@ -1,0 +1,17 @@
+{
+  "colors": {
+    "model": "muted",
+    "path": "dim",
+    "gitClean": "dim",
+    "gitDirty": "muted",
+    "context": "muted",
+    "contextWarn": "dim",
+    "contextError": "warning",
+    "cost": "text",
+    "tokens": "dim",
+    "thinking": "dim",
+    "thinkingMinimal": "muted",
+    "thinkingLow": "muted",
+    "thinkingMedium": "muted"
+  }
+}
