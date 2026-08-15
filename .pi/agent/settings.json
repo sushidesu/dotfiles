@@ -4,8 +4,12 @@
   "defaultProvider": "opencode-go",
   "defaultModel": "deepseek-v4-flash",
   "defaultThinkingLevel": "high",
+  "powerline": {
+    "disabledSegments": ["thinking"]
+  },
   "packages": [
     "npm:pi-anthropic-oauth",
-    "npm:@tintinweb/pi-subagents"
+    "npm:@tintinweb/pi-subagents",
+    "npm:pi-powerline-footer"
   ]
 }
