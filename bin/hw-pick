@@ -34,9 +34,10 @@ set -euo pipefail
 # and ~/.local/bin/herdr resolve regardless
 export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
 
-# the hw-mru plugin (linked by ensure_mru_plugin) logs tab focus order here;
-# path is fixed by herdr from the plugin id, so hw-pick can read it directly
-MRU_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr/plugins/hw-mru/mru"
+# the hw-mru plugin (linked by ensure_mru_plugin) keeps one empty file per tab
+# here, named by tab_id with its mtime as the last focus; path is fixed by
+# herdr from the plugin id, so hw-pick can read it directly
+MRU_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/herdr/plugins/hw-mru/tabs"
 
 # Fields (tab-separated): type, target, preview pane, display, cwd.
 #   type T → target is a tab_id, preview pane is its focused/first pane
@@ -45,7 +46,8 @@ MRU_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/herdr/plugins/hw-mru/mru"
 list_tabs() {
   local ws_json mru=""
   ws_json=$(herdr workspace list)
-  [[ -f "$MRU_FILE" ]] && mru=$(<"$MRU_FILE")
+  # -tr lists oldest first, which is the order the $rank map below expects
+  [[ -d "$MRU_DIR" ]] && mru=$(ls -tr "$MRU_DIR")
   {
     printf '%s\n' "$ws_json"
     jq -r '.result.workspaces[].workspace_id' <<<"$ws_json" \
@@ -59,8 +61,8 @@ list_tabs() {
     | ($ws | map({key: .workspace_id, value: .label}) | from_entries) as $wsl
     | ([.[] | select(.type == "pane_list").panes[]]
         | group_by(.tab_id) | map({key: .[0].tab_id, value: .}) | from_entries) as $panes
-    # a tab_id maps to the line index of its LAST focus in the log; higher =
-    # more recent. tabs never focused since the log began have no entry.
+    # a tab_id maps to its position in the mtime-ordered listing; higher =
+    # more recent. tabs never focused since hw-mru was installed have no entry.
     | ($mru | split("\n") | map(select(length > 0))
         | to_entries | reduce .[] as $e ({}; .[$e.value] = ($e.key))) as $rank
     | [.[] | select(.type == "tab_list").tabs[]]

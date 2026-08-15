@@ -3,9 +3,14 @@
 # herdr exposes no last-focused timestamp (unlike tmux's session_last_attached,
 # which ta-pick sorted on), so the order has to be observed as it happens. This
 # hook fires on every tab focus — sidebar click, keybinding, or `herdr tab
-# focus` alike — and appends the focused tab_id to a log. Append-only so
-# concurrent focuses can't corrupt it; hw-pick reads the log and treats each
-# tab_id's last occurrence as its recency. herdr creates HERDR_PLUGIN_STATE_DIR.
+# focus` alike — and touches one empty file per tab: the name is the tab_id,
+# the mtime is when it was last focused. That directory is the map hw-pick
+# wants; a log of every focus would instead grow with focuses rather than with
+# tabs, and have to be replayed on every read. Keying by filename also makes
+# each update atomic on its own key with no coordination, which is the binding
+# constraint here: herdr spawns this hook independently per event, so it can
+# neither lock nor safely read-modify-write a shared file. hw-pick reads the
+# order back with `ls -tr`. herdr creates HERDR_PLUGIN_STATE_DIR.
 #
 # hw-pick links this plugin itself (idempotently), so there is no separate
 # install step to keep in sync.
@@ -16,4 +21,5 @@ min_herdr_version = "0.7.4"
 
 [[events]]
 on = "tab.focused"
-command = ["sh", "-c", "printf '%s\\n' \"$HERDR_TAB_ID\" >> \"$HERDR_PLUGIN_STATE_DIR/mru\""]
+command = ["sh", "-c", "mkdir -p \"$HERDR_PLUGIN_STATE_DIR/tabs\" && touch \"$HERDR_PLUGIN_STATE_DIR/tabs/$HERDR_TAB_ID\""]
+
