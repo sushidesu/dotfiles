@@ -114,3 +114,6 @@ rows = [["state_icon", "tab"], ["agent"]]
 # keep either way.
 [ui.sidebar.spaces]
 hidden = true
+
+[experimental]
+kitty_graphics = true
