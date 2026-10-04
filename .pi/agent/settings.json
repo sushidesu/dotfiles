@@ -1,15 +1,18 @@
 {
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "1.0.0",
   "theme": "dark",
   "defaultProvider": "opencode-go",
   "defaultModel": "deepseek-v4-flash",
   "defaultThinkingLevel": "high",
   "powerline": {
-    "disabledSegments": ["thinking"]
+    "disabledSegments": [
+      "thinking"
+    ]
   },
   "packages": [
     "npm:pi-anthropic-oauth",
     "npm:@tintinweb/pi-subagents",
     "npm:pi-powerline-footer"
-  ]
+  ],
+  "hideThinkingBlock": false
 }
