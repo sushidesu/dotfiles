@@ -1,17 +1,13 @@
 # 基本的なコマンド
-alias ls='exa -1 --sort Extension'
+alias ls='eza -1 --sort Extension'
 alias lst='ls -T -L=2'
-alias la='exa -1 --sort Extension -a'
+alias la='eza -1 --sort Extension -a'
 alias lat='la -T -L=2'
 alias vim='nvim'
 
 # shell
 alias reload-shell='exec $SHELL -l'
 alias showpath='echo $PATH | tr ":" "\n" | nl'
-
-# 競プロ用
-alias atest='g++ main.cpp && oj t'
-alias ainit='xclip -o | xargs oj d && touch main.cpp'
 
 # vscode
 alias coder='code -r .'
@@ -22,16 +18,6 @@ alias lg='lazygit'
 # npm
 alias nr='npm run'
 alias yw='yarn workspace'
-
-# test
-alias testfile='f() { 
-  FILE="$1"
-  BASENAME=$(basename "$FILE")
-  EXT="${BASENAME##*.}"
-  NAMEONLY="${BASENAME%.*}"
-  TESTFILE="${NAMEONLY}.test.${EXT}"
-  npm test -- --silent --coverage --watchAll=false --collectCoverageFrom="$FILE" "$TESTFILE"
-}; f'
 
 # git
 alias ss='git ss'

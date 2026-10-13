@@ -1,3 +1,14 @@
+# Run the jest test file paired with the given source file, with coverage
+# scoped to that file.
+testfile() {
+  local file="$1"
+  local basename="${file:t}"
+  local ext="${basename##*.}"
+  local nameonly="${basename%.*}"
+  npm test -- --silent --coverage --watchAll=false \
+    --collectCoverageFrom="$file" "${nameonly}.test.${ext}"
+}
+
 _tmux_session_name_from_dir() {
   local dir="$1"
   local name="${dir:t}"
