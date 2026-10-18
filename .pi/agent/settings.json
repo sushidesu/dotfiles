@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "1.0.0",
+  "lastChangelogVersion": "1.3.0",
   "theme": "dark",
   "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-v4-flash",
+  "defaultModel": "deepseek-v4.1-flash",
   "defaultThinkingLevel": "high",
   "powerline": {
     "disabledSegments": [
@@ -12,7 +12,10 @@
   "packages": [
     "npm:pi-anthropic-oauth",
     "npm:@tintinweb/pi-subagents",
-    "npm:pi-powerline-footer"
+    "npm:pi-powerline-footer",
+    "npm:@99percentpeople/pi-codex-api",
+    "npm:@kaishin/pi-usage",
+    "npm:billion-context"
   ],
   "hideThinkingBlock": false
 }
