@@ -94,19 +94,17 @@ message "\$DOTPATH/.config/herdr/config.toml"
 mkdir -p "$HOME/.config/herdr"
 linking "$DOTPATH/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
-# ~/.pi is shared with Claude Code (~/.Claude Code -> ~/.pi) and holds runtime
-# state (sessions, auth, model store), so link only the hand-maintained files:
-# settings.json (theme/provider/model/packages) and keybindings.json
-message "\$DOTPATH/.pi/agent/*"
-mkdir -p "$HOME/.pi/agent"
-linking "$DOTPATH/.pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
-linking "$DOTPATH/.pi/agent/keybindings.json" "$HOME/.pi/agent/keybindings.json"
-
-# extensions/ is also written by other tools (Orca installs its own extensions
-# there), so link only the files dotfiles owns instead of the whole dir
-message "\$DOTPATH/.pi/agent/extensions/powerline-footer/theme.json"
-mkdir -p "$HOME/.pi/agent/extensions/powerline-footer"
-linking "$DOTPATH/.pi/agent/extensions/powerline-footer/theme.json" "$HOME/.pi/agent/extensions/powerline-footer/theme.json"
+# ~/.pi is shared with Claude Code (~/.Claude Code -> ~/.pi)
+# ~/.pi/agent also holds runtime state and secrets (sessions, auth.json,
+# mcp-auth.json, models-store.json), and extensions/ is written by other tools
+# (herdr and Orca install their own extensions there), so link file by file.
+# Packages in settings.json are installed by pi itself on first launch.
+message "\$DOTPATH/.pi/agent/**"
+while IFS= read -r -d '' path; do
+  rel=${path#"$DOTPATH/.pi/agent/"}
+  mkdir -p "$HOME/.pi/agent/$(dirname "$rel")"
+  linking "$path" "$HOME/.pi/agent/$rel"
+done < <(find "$DOTPATH/.pi/agent" -type f ! -name .DS_Store -print0)
 
 message "\$DOTPATH/.claude/commands/*"
 mkdir -p "$HOME/.claude"

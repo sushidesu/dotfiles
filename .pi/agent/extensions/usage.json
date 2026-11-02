@@ -1,0 +1,11 @@
+{
+  "configVersion": "2.3.0",
+  "usageCommand": true,
+  "providerCommands": true,
+  "usageStatus": true,
+  "usageStatusPlacement": "statusBar",
+  "tokenStatus": true,
+  "quotaWarnings": true,
+  "deferToSynthetic": true,
+  "hideUnconfiguredProviders": true
+}

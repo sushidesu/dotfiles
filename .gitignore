@@ -14,3 +14,12 @@ settings.local.json
 .vscode/extensions
 .vscode/argv.json
 
+
+# pi: link.sh links every file under .pi/agent/, so keep secrets and runtime
+# state out even if one gets copied here by mistake
+.pi/agent/auth.json
+.pi/agent/mcp-auth.json
+.pi/agent/models-store.json
+.pi/agent/trust.json
+.pi/agent/sessions/
+.pi/agent/npm/
