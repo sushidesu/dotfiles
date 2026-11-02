@@ -14,7 +14,6 @@ zoxide = "latest"
 lazygit = "latest"
 tmux = "latest"
 gh = "latest"
-"cargo:fnm" = "latest"
 delta = "latest"
 "cargo:treemd" = "latest"
 yazi = "latest"
@@ -23,3 +22,8 @@ yarn = "1"
 uv = "latest"
 java = "21"
 "aqua:earendil-works/pi" = "latest"
+node = "26"
+pnpm = "12"
+
+[settings]
+idiomatic_version_file_enable_tools = ["node", "pnpm"]
