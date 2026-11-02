@@ -4,21 +4,53 @@
 # herdr update installs the official binary, which loses the patches in
 # ~/.dotfiles/scripts/herdr-patches/; run this afterwards to restore them.
 #
-# Requirements: rust (stable), brew zig@0.15 (the formula carries the
-# libSystem fix for macOS 26 that upstream zig 0.15.2 lacks).
+# Requirements:
+#   - rust (stable; the repo's rust-toolchain.toml pins the version)
+#   - the exact zig the tag's CI pins, managed by mise (mise's zig is the
+#     official ziglang.org build). v0.9.0 and older pinned zig 0.15 via
+#     brew's patched formula; v0.9.1 switched to official zig 0.16.0.
 #
-# Usage: herdr-rebuild [ref]   # git ref to build, default: latest tag
+# The zig for a ref is derived from herdr's CI, never guessed: an unexpected
+# ref, a missing version, or an unsettable HERDR_ZIG stops the build loudly
+# instead of silently building with some other zig.
+#
+# Usage: herdr-rebuild [ref]        # git ref to build, default: latest tag
+#        HERDR_ZIG=/path/to/zig herdr-rebuild v0.9.3   # explicit zig override
 
 set -euo pipefail
 
 ref="${1:-}"
 patches_dir="$HOME/.dotfiles/scripts/herdr-patches"
 build_dir="${XDG_CACHE_HOME:-$HOME/.cache}/herdr-build"
-zig_bin="$(brew --prefix zig@0.15)/bin"
-[[ -x "$zig_bin/zig" ]] || { echo "herdr-rebuild: brew install zig@0.15 first" >&2; exit 1; }
+
 # a missing patches dir must fail loudly — silently building stock herdr
 # is the one outcome this script exists to prevent
 [[ -d "$patches_dir" ]] || { echo "herdr-rebuild: $patches_dir not found" >&2; exit 1; }
+
+# The vendored libghostty-vt build needs the same zig the tag's CI pinned:
+# v0.9.0 and older used 0.15 (brew's patched formula), v0.9.1+ official
+# 0.16.0. No fallbacks — resolve exactly one zig or set HERDR_ZIG.
+resolve_zig() {
+  local ref="$1"
+  if [[ -n "${HERDR_ZIG:-}" ]]; then
+    [[ -x "$HERDR_ZIG" ]] || { echo "herdr-rebuild: HERDR_ZIG not executable: $HERDR_ZIG" >&2; exit 1; }
+    zig_bin="$HERDR_ZIG"
+    return
+  fi
+
+  local ver dir
+  case "$ref" in
+    v0.9.*) ver=0.16.0 ;;
+    v0.*) ver=0.15.2 ;;
+    *) { echo "herdr-rebuild: no zig mapping for ref '$ref'; set HERDR_ZIG" >&2; exit 1; } ;;
+  esac
+  dir="$(mise where "zig@$ver" 2>/dev/null)" || true
+  if [[ -z "$dir" || ! -x "$dir/bin/zig" ]]; then
+    echo "herdr-rebuild: ref '$ref' requires zig $ver (mise install zig@$ver); HERDR_ZIG can override" >&2
+    exit 1
+  fi
+  zig_bin="$dir/bin/zig"
+}
 
 if [[ -d "$build_dir/.git" ]]; then
   git -C "$build_dir" fetch --tags origin
@@ -34,6 +66,9 @@ fi
 git checkout --force "$ref"
 git clean -fd
 
+resolve_zig "$ref"
+echo "herdr-rebuild: using zig $zig_bin ($("$zig_bin" version))"
+
 for p in "$patches_dir"/*.patch; do
   [[ -e "$p" ]] || continue
   echo "applying ${p##*/}"
@@ -42,7 +77,8 @@ for p in "$patches_dir"/*.patch; do
   git apply --3way "$p"
 done
 
-PATH="$zig_bin:$HOME/.cargo/bin:$PATH" RUSTUP_TOOLCHAIN=stable \
+zig_dir="$(dirname "$zig_bin")"
+PATH="$zig_dir:$HOME/.cargo/bin:$PATH" RUSTUP_TOOLCHAIN=stable ZIG="$zig_bin" \
   cargo build --release
 
 install -d "$HOME/.local/bin"
