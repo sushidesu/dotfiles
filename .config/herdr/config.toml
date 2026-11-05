@@ -108,12 +108,5 @@ delivery = "system"
 [ui.sidebar.agents]
 rows = [["state_icon", "tab"], ["agent"]]
 
-# requires the patched build (scripts/herdr-patches): hide the spaces
-# section entirely — workspace switching is unused, only the agent queue
-# matters. The stock binary ignores the unknown key, so this is safe to
-# keep either way.
-[ui.sidebar.spaces]
-hidden = true
-
 [experimental]
 kitty_graphics = true
