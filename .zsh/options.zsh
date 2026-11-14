@@ -1,7 +1,5 @@
 # user
 unsetopt PROMPT_SP
-autoload -Uz compinit
-compinit
 
 setopt share_history
 setopt append_history

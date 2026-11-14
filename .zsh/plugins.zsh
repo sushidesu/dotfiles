@@ -4,11 +4,10 @@ zinit snippet 'OMZ::lib/completion.zsh'
 zinit ice wait"0" lucid
 zinit snippet 'OMZ::lib/compfix.zsh'
 
-# plugin
-zinit cdreplay -q
-
 # complete command
-zinit ice wait"0" lucid
+# blockf: zinit links the completions into its own completions dir (already
+# on fpath), so the plugin must not prepend its src dir as well
+zinit ice wait"0" lucid blockf atpull'zinit creinstall -q .'
 zinit light 'zsh-users/zsh-completions'
 
 # highlight commands
