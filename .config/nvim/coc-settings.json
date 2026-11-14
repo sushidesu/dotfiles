@@ -1,4 +1,0 @@
-{
-  "tsserver.enableJavascript": true,
-  "eslint.filetypes": ["javascript", "typescript", "typescriptreact", "javascriptreact", "typescript.tsx"]
-}

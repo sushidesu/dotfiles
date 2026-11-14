@@ -1,3 +1,0 @@
-# VSCode-specific plugins (plugins unique to VSCode usage)
-# Common plugins like quick-scope, clever-f, vim-sandwich, vim-visual-multi
-# are loaded from dein.toml for both regular Neovim and VSCode

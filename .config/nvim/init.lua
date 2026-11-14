@@ -1,5 +1,4 @@
 -- Minimal Neovim configuration
--- Convert options from options.rc.vim to Lua
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -20,7 +19,7 @@ vim.opt.number = true
 vim.opt.list = true
 vim.opt.listchars = {eol='$', tab='>-', trail='~', extends='>', precedes='<'}
 
--- General vim options (moved from coc-options.vim for better organization)
+-- General vim options
 -- if hidden is not set, TextEdit might fail.
 vim.opt.hidden = true
 
