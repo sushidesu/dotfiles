@@ -1,3 +1,7 @@
+# Drop duplicates whenever the path array is assigned; .zshrc re-prepends
+# ~/.local/bin through it to move the entry to the front.
+typeset -U path
+
 # .dotfiles PATH
 export DOTPATH="$HOME/.dotfiles"
 
