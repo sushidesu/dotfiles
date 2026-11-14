@@ -1,8 +1,8 @@
 {
   "lastChangelogVersion": "1.4.0",
   "theme": "dark",
-  "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-v4.1-flash",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-8",
   "defaultThinkingLevel": "high",
   "powerline": {
     "disabledSegments": [
@@ -14,8 +14,8 @@
     "npm:@tintinweb/pi-subagents",
     "npm:pi-powerline-footer",
     "npm:@99percentpeople/pi-codex-api",
-    "npm:@kaishin/pi-usage",
-    "npm:billion-context"
+    "npm:@kaishin/pi-usage"
   ],
-  "hideThinkingBlock": true
+  "hideThinkingBlock": false,
+  "deviceId": "57cbb840-f533-4fb4-883a-2f50e93eac63"
 }
