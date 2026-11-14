@@ -2,7 +2,7 @@
 
 # .config/herdr is excluded from the .config sweep: ~/.config/herdr holds
 # runtime state (sockets, logs), so only config.toml gets linked below
-EXCLUDE_PATH=(".git" ".config" ".config/herdr" ".claude" ".codex" ".pi" "home" "scripts" "AGENTS.md" "CLAUDE.md" "README.md")
+EXCLUDE_PATH=(".git" ".config" ".config/herdr" ".claude" ".claude-work" ".codex" ".pi" "home" "scripts" "AGENTS.md" "CLAUDE.md" "README.md")
 EXCLUDE_FILES=(".DS_Store")
 # ~/.dotfiles is a fixed location: .zshenv exports it as DOTPATH and other
 # scripts rely on it, so a clone elsewhere would link a different (or missing)
@@ -106,23 +106,19 @@ while IFS= read -r -d '' path; do
   linking "$path" "$HOME/.pi/agent/$rel"
 done < <(find "$DOTPATH/.pi/agent" -type f ! -name .DS_Store -print0)
 
-message "\$DOTPATH/.claude/commands/*"
-mkdir -p "$HOME/.claude"
-linking "$DOTPATH/.claude/commands" "$HOME/.claude/commands"
-
-message "\$DOTPATH/.claude/commands -> ~/.codex/prompts"
-mkdir -p "$HOME/.codex"
-linking "$DOTPATH/.claude/commands" "$HOME/.codex/prompts"
-
 message "\$DOTPATH/.claude/skills/*"
+mkdir -p "$HOME/.claude"
 linking "$DOTPATH/.claude/skills" "$HOME/.claude/skills"
 
 message "\$DOTPATH/.claude/skills -> ~/.codex/skills"
+mkdir -p "$HOME/.codex"
 linking "$DOTPATH/.claude/skills" "$HOME/.codex/skills"
 
 message "\$DOTPATH/home/*"
 link_anywhere "$DOTPATH/home" "$HOME"
 
-message "\$DOTPATH/home/CLAUDE.md -> ~/.claude-work/CLAUDE.md"
+# the work profile imports the shared ~/AGENTS.md and adds work-only rules;
+# ~/.claude-work also holds runtime state, so link only the file
+message "\$DOTPATH/.claude-work/CLAUDE.md -> ~/.claude-work/CLAUDE.md"
 mkdir -p "$HOME/.claude-work"
-linking "$DOTPATH/home/CLAUDE.md" "$HOME/.claude-work/CLAUDE.md"
+linking "$DOTPATH/.claude-work/CLAUDE.md" "$HOME/.claude-work/CLAUDE.md"
