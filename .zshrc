@@ -40,3 +40,6 @@ source "$HOME/.zsh/functions.zsh"
 # run_at_startup prepends tool dirs; keep ~/.local/bin (herdr, moshi, mise) ahead of them.
 # Assigned through the path array so `typeset -U path` (.zshenv) drops the old entry.
 path=("$HOME/.local/bin" $path)
+
+# Report links that tools replaced with regular files; silent when all is well
+"$DOTPATH/scripts/link.sh" --check

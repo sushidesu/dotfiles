@@ -78,23 +78,26 @@ plan_links() {
   printf '%s\t%s\n' "$DOTPATH/.claude-work/CLAUDE.md" "$HOME/.claude-work/CLAUDE.md"
 }
 
-# Prints "ok", "missing", "elsewhere" (a link to another path) or "replaced"
-# (a regular file or dir stands where the link should be)
+# Sets STATE to "ok", "missing", "elsewhere" (a link to another path) or
+# "replaced" (a regular file or dir stands where the link should be).
+# A variable rather than output: --check runs at every shell startup, and a
+# subshell plus readlink per entry would double the startup time.
 link_state() {
   local from=$1 to=$2
   if [ -h "$to" ]; then
-    [ "$(readlink "$to")" == "$from" ] && echo ok || echo elsewhere
+    if [ "$to" -ef "$from" ]; then STATE=ok; else STATE=elsewhere; fi
   elif [ -e "$to" ]; then
-    echo replaced
+    STATE=replaced
   else
-    echo missing
+    STATE=missing
   fi
 }
 
 do_link() {
   local from to
   while IFS=$'\t' read -r from to; do
-    case $(link_state "$from" "$to") in
+    link_state "$from" "$to"
+    case $STATE in
       ok) ;;
       missing)
         mkdir -p "$(dirname "$to")"
@@ -110,7 +113,8 @@ do_link() {
 do_check() {
   local from to problems=0
   while IFS=$'\t' read -r from to; do
-    case $(link_state "$from" "$to") in
+    link_state "$from" "$to"
+    case $STATE in
       ok) ;;
       missing) echo -e "${C_YE}dotfiles${NC} missing link: $to"; problems=1 ;;
       elsewhere) echo -e "${C_YE}dotfiles${NC} $to links to $(readlink "$to"), not the repo"; problems=1 ;;

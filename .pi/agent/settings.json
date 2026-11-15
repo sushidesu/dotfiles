@@ -1,5 +1,4 @@
 {
-  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5",
@@ -16,6 +15,5 @@
     "npm:@99percentpeople/pi-codex-api",
     "npm:@kaishin/pi-usage"
   ],
-  "hideThinkingBlock": false,
-  "deviceId": "57cbb840-f533-4fb4-883a-2f50e93eac63"
+  "hideThinkingBlock": false
 }
