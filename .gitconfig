@@ -55,3 +55,12 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+# pi rewrites ~/.pi/agent/settings.json (linked to the dotfiles repo) with
+# per-machine state: a device id and the versions whose changelogs it has
+# shown. Strip them when staging so only real settings reach the repo; the
+# live file keeps them. required: a machine without jq fails loudly instead
+# of committing the state.
+[filter "pi-settings"]
+	clean = jq --indent 2 'del(.deviceId, .lastChangelogVersion, .extensionChangelogVersions)'
+	required = true

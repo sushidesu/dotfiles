@@ -1,0 +1,2 @@
+# pi writes per-machine state into its settings file (see the filter in .gitconfig)
+.pi/agent/settings.json filter=pi-settings
