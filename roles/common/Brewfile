@@ -1,0 +1,3 @@
+# Formulae every machine needs. CLI tools go to mise (.config/mise/config.toml)
+# whenever mise can install them; brew is for what mise cannot.
+brew "git"

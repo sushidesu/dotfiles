@@ -25,6 +25,15 @@ for i in $HOME/.zsh/run_at_startup/*; do
   source $i
 done;
 
+# role-specific inits (roles/<role>/zsh); scripts/bootstrap.sh records the role
+if [[ -r $HOME/.config/dotfiles/role ]]; then
+  for i in $DOTPATH/roles/$(<$HOME/.config/dotfiles/role)/zsh/*(N); do
+    source $i
+  done
+else
+  print -u2 "dotfiles: no role recorded; run $DOTPATH/scripts/bootstrap.sh <role>"
+fi
+
 # alias
 source "$HOME/.zsh/aliases.zsh"
 

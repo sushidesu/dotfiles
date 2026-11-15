@@ -1,0 +1,10 @@
+# The Mac mini: a headless box reached from the phone over Tailscale + mosh,
+# running agents inside herdr.
+
+# mosh-server, which the Moshi app connects to
+brew "mosh"
+# Markdown viewer served over HTTP, readable from other devices
+tap "k1low/tap"
+brew "k1low/tap/mo"
+# client tools only (keg-only, not on PATH)
+brew "postgresql@15"
